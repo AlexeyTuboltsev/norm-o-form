@@ -38,6 +38,7 @@ export const SelectInput: React.FunctionComponent<TSelectInput> = (props) => {
         id={id}
         disabled={disabled}
         value={value}
+        onChange={()=>undefined}
         style={style}
       >
         {options.map(({ key, label }) => (

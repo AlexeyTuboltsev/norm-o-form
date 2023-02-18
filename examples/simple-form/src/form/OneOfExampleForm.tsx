@@ -1,35 +1,37 @@
 import { FormWrapper } from "./FormWrapper";
-import { TFormReducer, TOneOfExampleForm } from "./formReducer";
+import { EFormUpdateType, formActions, TFormUpdate, TOneOfExampleForm } from "./formReducer";
 import { TextInput } from "./TextInput";
 import React from "react";
 import { SelectInput } from "./SelectInput";
+import { connect } from "react-redux";
 
 type TOneOfExampleFormProps<T> = {
   formId: string;
   formData: T;
-  submitForm: () => void
 }
 
-export const OneOfExampleForm: React.FunctionComponent<TOneOfExampleFormProps<TOneOfExampleForm>> = ({ formId, formData,submitForm }) =>
+export const OneOfExampleForm: React.FunctionComponent<TOneOfExampleFormProps<TOneOfExampleForm>> = ({
+  formId,
+  formData,
+}) =>
   <FormWrapper
     formId={formId}
-    onChange={()=>undefined}
   >
-      < TextInput
-        {...formData["oneOfExampleForm.appName"]}
-        label="appName"
-      />
-      <SelectInput
-        {...formData["oneOfExampleForm.appVersion"]}
-        label="appVersion"
-      />
-      < TextInput
-        {...formData["oneOfExampleForm.email"]}
-        label="email"
-      />
-      < TextInput
-        {...formData["oneOfExampleForm.deviceId"]}
-        label="deviceId"
-      />
+    < TextInput
+      {...formData["oneOfExampleForm.appName"]}
+      label="appName"
+    />
+    <SelectInput
+      {...formData["oneOfExampleForm.appVersion"]}
+      label="appVersion"
+    />
+    < TextInput
+      {...formData["oneOfExampleForm.email"]}
+      label="email"
+    />
+    < TextInput
+      {...formData["oneOfExampleForm.deviceId"]}
+      label="deviceId"
+    />
 
   </FormWrapper>

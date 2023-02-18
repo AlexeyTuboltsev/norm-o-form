@@ -11,8 +11,11 @@ function App() {
     <div className="App">
 
       <ToggleFormButton />
-      {formState.forms[ONE_OF_EXAMPLE_FORM_ROOT]
-        ? <OneOfExampleForm formId={ONE_OF_EXAMPLE_FORM_ROOT} formData={formState.forms[ONE_OF_EXAMPLE_FORM_ROOT]} submitForm={() => undefined} />
+      {formState[ONE_OF_EXAMPLE_FORM_ROOT]
+        ? <OneOfExampleForm
+            formId={ONE_OF_EXAMPLE_FORM_ROOT}
+            formData={formState[ONE_OF_EXAMPLE_FORM_ROOT]}
+          />
         : null
       }
     </div>

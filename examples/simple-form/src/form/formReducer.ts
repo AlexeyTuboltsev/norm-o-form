@@ -1,17 +1,7 @@
 import produce from "immer";
-import {
-  formRoot,
-  isGeoCoordinate,
-  isNotEmpty,
-  isValidEmailAddress,
-  maxLength,
-  oneOf,
-  select,
-  textInput,
-  TSelectInputData,
-  TTextInputData,
-  validateForm
-} from "formality";
+import { handleFormChange, TSelectInputData, TTextInputData, validateForm } from "formality";
+import { generateOneOfExampleFormData, initialFormValues } from "./formDataGenerator";
+import { GetReturnType } from "./utils";
 
 export type TOneOfExampleForm = {
   'oneOfExampleForm.appName': TTextInputData;
@@ -21,160 +11,69 @@ export type TOneOfExampleForm = {
 };
 
 export type TFormReducer = {
-  forms: {
-    oneOfExampleForm?: (TOneOfExampleForm)
-  }
+  oneOfExampleForm?: (TOneOfExampleForm)
 }
 
-
-export enum EFormAction {
+export enum EFormActionType {
   OPEN_FORM = "formAction.openForm",
   CLOSE_FORM = "formAction.closeForm",
+  UPDATE_FORM = "updateForm"
 }
 
 
-const initialState: TFormReducer = {
-  forms : {}
+export enum EFormUpdateType {
+  FOCUS = "formUpdateType.focus",
+  CHANGE = "formUpdateType.change",
+  PASTE = "formUpdateType.paste",
+  BLUR = "formUpdateType.blur",
 }
+
+export type TFormUpdate = { updateType: EFormUpdateType, formId: string, fieldId: string, value: string }
+
+const initialState: TFormReducer = {}
 
 export const formActions = {
-  openForm: () => ({ type: EFormAction.OPEN_FORM }),
-  closeForm: () => ({ type: EFormAction.CLOSE_FORM })
+  openForm: () => ({ type: EFormActionType.OPEN_FORM as const }),
+  closeForm: () => ({ type: EFormActionType.CLOSE_FORM as const }),
+  updateForm: (payload: TFormUpdate) => ({
+    type: EFormActionType.UPDATE_FORM as const,
+    payload
+  }),
 }
 
-export enum EOneOfType {
-  option1 = 'option1',
-  option2 = 'option2',
-}
 
 export const ONE_OF_EXAMPLE_FORM_ROOT = 'oneOfExampleForm';
 
-const initialFormValues = {
-  appName: 'xxx',
-  appVersion: '28',
-  email: 'asdfasd@sdaf.xx',
-  deviceId: '687943-848748',
-  type: EOneOfType.option2,
-  zzz: 'zzz_value',
-  xxx1: 'xxx1_val',
-  xxx2: 'xsadf',
-};
 
-function generateOneOfExampleFormData(
-  rootFormId: string,
-  initialValues: {
-    appName: string;
-    appVersion: string;
-    email: string;
-    deviceId: string;
-    type: EOneOfType;
-    zzz: string;
-    xxx1: string;
-    xxx2: string;
-  },
-) {
-  return formRoot<TOneOfExampleForm>({
-    formId: rootFormId,
-    validations: [] as any,
-    childrenFactories: [
-      textInput({
-        id: 'deviceId',
-        value: initialValues.deviceId,
-        validations: [
-          isNotEmpty({ errorMessage: 'this value is mandatory' }),
-          maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
-        ],
-        isRequiredField: true,
-      }),
-      textInput({
-        id: 'email',
-        value: initialValues.email,
-        validations: [
-          isNotEmpty({ errorMessage: 'this value is mandatory' }),
-          isValidEmailAddress({ errorMessage: 'please provide a valid email' }),
-          maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
-        ],
-        isRequiredField: true,
-      }),
-      textInput({
-        id: 'appName',
-        value: initialValues.appName,
-        validations: [
-          isNotEmpty({ errorMessage: 'this value is mandatory' }),
-          maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
-        ],
-        isRequiredField: true,
-      }),
-      select({
-        path: 'appVersion',
-        value: initialValues.appVersion,
-        options: [
-          { key: 'appOne', label: 'appOne' },
-          { key: 'appTwo', label: 'appTwo' },
-        ],
-        validations: [
-          isNotEmpty({ errorMessage: 'this value is mandatory' }),
-          maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
-        ],
-        isRequiredField: true,
-      }),
-      oneOf({
-        path: 'variants',
-        switcherOptions: {
-          path: 'type',
-          value: initialValues.type,
-          options: Object.values(EOneOfType).map((option) => ({ key: option, label: option })),
-        },
-        variants: {
-          [EOneOfType.option1]: {
-            validations: [],
-            children: [
-              textInput({
-                id: 'zzz',
-                validations: [isGeoCoordinate({ errorMessage: 'this is not a geo coordinate' })],
-                value: initialValues.zzz || '',
-                isRequiredField: false,
-              }),
-            ],
-          },
-          [EOneOfType.option2]: {
-            validations: [],
-            children: [
-              textInput({
-                id: 'xxx1',
-                validations: [isValidEmailAddress({ errorMessage: 'xxx1 is not an email' })],
-                value: initialValues.xxx1 || '',
-                isRequiredField: false,
-              }),
-              textInput({
-                id: 'xxx2',
-                validations: [isValidEmailAddress({ errorMessage: 'xxx1 is not an email' })],
-                value: initialValues.xxx2 || '',
-                isRequiredField: false,
-              }),
-            ],
-          },
-        },
-      }),
-    ],
-  });
-}
-
-export function formReducer(state: TFormReducer = initialState, action: any) {
+export function formReducer(state: TFormReducer = initialState, action: GetReturnType<typeof formActions>) {
   switch (action.type) {
-    case EFormAction.OPEN_FORM:
+    case EFormActionType.OPEN_FORM:
       return produce(state, _draftState => ({
-        forms: {
-          oneOfExampleForm: validateForm(generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues))
-        }
+        oneOfExampleForm: validateForm(generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues))
+      }))
+    case EFormActionType.CLOSE_FORM:
+      return produce(state, _draftState => ({
+        oneOfExampleForm: undefined
+      }))
+    case EFormActionType.UPDATE_FORM: {
+      switch (action.payload.updateType) {
+        case EFormUpdateType.CHANGE: {
+          return produce(state, draftState => {
+            if (draftState.oneOfExampleForm) {
+              const formData = draftState.oneOfExampleForm
+              handleFormChange(formData, action.payload.fieldId, action.payload.value)
 
-      }))
-    case EFormAction.CLOSE_FORM:
-      return produce(state, draftState => ({
-        forms: {
-          oneOfExampleForm: undefined
+            }
+          })
         }
-      }))
+        case EFormUpdateType.BLUR:
+        case EFormUpdateType.FOCUS:
+        case EFormUpdateType.PASTE:
+        default: {
+          return produce(state, draftState => draftState)
+        }
+      }
+    }
     default:
       return state
   }

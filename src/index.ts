@@ -23,6 +23,12 @@ import {
 import {
   validateForm
 } from "./core"
+import {
+  handleFormChange,
+  handleFormBlur,
+} from "./handlers"
+
+
 export {
   validateForm,
   formRoot,
@@ -34,6 +40,9 @@ export {
   numericInput,
   select,
   selectTag,
+
+  handleFormBlur,
+  handleFormChange,
 
   isNotEmpty,
   maxLength,

@@ -23,6 +23,7 @@ export const TextInput: React.FunctionComponent<TTextInputProps> = ({
   errors,
   disabled = false,
 }) => {
+  console.log("TextInput",id, value)
   return (
     <div className={styles.formFieldContainer}>
       <label className={value ? styles.labelActive : styles.label}>{`${label}${isRequiredField ? ' *' : ''}`}</label>
@@ -31,6 +32,7 @@ export const TextInput: React.FunctionComponent<TTextInputProps> = ({
         id={id}
         value={value}
         disabled={disabled}
+        onChange={()=>undefined}
       />
       {showError && touched && <div className="error">{errors}</div>}
     </div>
