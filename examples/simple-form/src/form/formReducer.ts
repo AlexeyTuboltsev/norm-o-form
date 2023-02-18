@@ -44,39 +44,33 @@ export const formActions = {
 
 export const ONE_OF_EXAMPLE_FORM_ROOT = 'oneOfExampleForm';
 
+type A = GetReturnType<typeof formActions>
 
-export function formReducer(state: TFormReducer = initialState, action: GetReturnType<typeof formActions>) {
-  switch (action.type) {
-    case EFormActionType.OPEN_FORM:
-      return produce(state, _draftState => ({
-        oneOfExampleForm: validateForm(generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues))
-      }))
-    case EFormActionType.CLOSE_FORM:
-      return produce(state, _draftState => ({
-        oneOfExampleForm: undefined
-      }))
-    case EFormActionType.UPDATE_FORM: {
-      switch (action.payload.updateType) {
-        case EFormUpdateType.CHANGE: {
-          return produce(state, draftState => {
-            if (draftState.oneOfExampleForm) {
+
+export const formReducer = (state: TFormReducer = initialState, action: GetReturnType<typeof formActions>) => {
+  return produce(state, draftState => {
+    switch (action.type) {
+      case EFormActionType.OPEN_FORM:
+        draftState.oneOfExampleForm = validateForm(generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues))
+        break;
+      case EFormActionType.CLOSE_FORM:
+        draftState.oneOfExampleForm = undefined
+        break;
+      case EFormActionType.UPDATE_FORM: {
+        if (draftState.oneOfExampleForm) {
+          switch (action.payload.updateType) {
+            case EFormUpdateType.CHANGE: {
               const formData = draftState.oneOfExampleForm
               handleFormChange(formData, action.payload.fieldId, action.payload.value)
-
+              break;
             }
-          })
-        }
-        case EFormUpdateType.BLUR:
-        case EFormUpdateType.FOCUS:
-        case EFormUpdateType.PASTE:
-        default: {
-          return produce(state, draftState => draftState)
+            default:
+              break;
+          }
         }
       }
     }
-    default:
-      return state
-  }
+  })
 }
 
 
