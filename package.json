@@ -1,6 +1,6 @@
 {
-  "name": "formality",
-  "repository": "git://github.com/track-and-trace/kvinta-gac-portal.git",
+  "name": "norm-o-form",
+  "repository": "git://github.com/alexeyTuboltsev/norm-o-form.git",
   "version": "0.0.1",
   "private": true,
   "main": "src/index.ts",
