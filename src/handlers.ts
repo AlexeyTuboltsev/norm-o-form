@@ -6,7 +6,7 @@ import {
   validateForm,
   validateSelfAndParents,
 } from './core';
-import { EFormTypes, TForm, TOneOfData } from './types';
+import { EFormTypes, TFormData, TFormValidator, TOneOfData } from './types';
 import { generateRandomString, isPrimitiveValueField } from './utils';
 import { generateChildren } from './formDataGenerators';
 
@@ -80,17 +80,17 @@ export function removeArrayMember(arrayMemberId, formData) {
   return findFirstErrorToShow(setSelfAndParentsTouched(formDataValidated, arrayId), arrayId);
 }
 
-export function handleFormChange(formData: TForm, id: string, value) {
+export function handleFormChange<T extends TFormData>(validator: TFormValidator<T>, formData: T, id: string, value) {
   const fieldData = formData[id];
   if (fieldData.type === EFormTypes.SELECT_TAG) {
     const newFormData = chooseOneOf(formData, fieldData, value);
 
-    const validatedFormData = validateSelfAndParents(newFormData, id);
+    const validatedFormData = validateSelfAndParents(validator, newFormData, id);
     return setSelfAndParentsTouched(validatedFormData, id);
   } else if (isPrimitiveValueField(fieldData)) {
     fieldData.value = value;
 
-    const validatedFormData = validateSelfAndParents(formData, id);
+    const validatedFormData = validateSelfAndParents(validator, formData, id);
     return setSelfAndParentsTouched(validatedFormData, id);
   }
 }

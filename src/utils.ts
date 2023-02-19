@@ -2,7 +2,7 @@
 import {
   EButtonState,
   EFormTypes,
-  TForm,
+  TFormData,
   TFormFieldData,
   TIntegerInputData,
   TSelectInputData,
@@ -13,7 +13,7 @@ export function formDataToButtonState(formData) {
   return formData.errors.length ? EButtonState.DISABLED : EButtonState.ACTIVE;
 }
 
-export function getFormRoot<T extends TFormFieldData>(formData: TForm): T {
+export function getFormRoot<T extends TFormFieldData>(formData: TFormData): T {
   let rootField;
   for (const formFieldId in formData) {
     if (formData[formFieldId].type === EFormTypes.ROOT) {
@@ -24,7 +24,7 @@ export function getFormRoot<T extends TFormFieldData>(formData: TForm): T {
   return rootField;
 }
 
-export function getFormRootId<T extends TForm>(formData: T): string {
+export function getFormRootId<T extends TFormData>(formData: T): string {
   let rootFieldId;
   for (const formFieldId in formData) {
     if (formData[formFieldId].type === EFormTypes.ROOT) {

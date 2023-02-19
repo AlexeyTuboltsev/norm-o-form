@@ -10,9 +10,11 @@ import {
   selectTag,
 } from "./formDataGenerators";
 import {
-  TForm,
+  TFormData,
   TSelectInputData,
-  TTextInputData
+  TTextInputData,
+  TFormGenerator,
+  TFormValidator
 } from "./types"
 import {
   isNotEmpty,
@@ -49,7 +51,9 @@ export {
   isValidEmailAddress,
   isGeoCoordinate,
 
-  type TForm,
+  type TFormData,
+  type TFormGenerator,
   type TSelectInputData,
   type TTextInputData,
+  type TFormValidator
 }

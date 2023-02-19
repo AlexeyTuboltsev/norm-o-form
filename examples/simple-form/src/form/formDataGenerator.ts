@@ -7,9 +7,11 @@ import {
   maxLength,
   oneOf,
   select,
-  textInput
+  textInput, TFormData, TFormGenerator
 } from "formality";
 import { TOneOfExampleForm } from "./formReducer";
+import { TValidationFn } from "formality/types";
+import { TFormDataToFormGenerator } from "./utils";
 
 
 export enum EOneOfType {
@@ -28,6 +30,7 @@ export const initialFormValues = {
   xxx2: 'xsadf',
 };
 
+
 export function generateOneOfExampleFormData(
   rootFormId: string,
   initialValues: {
@@ -41,7 +44,7 @@ export function generateOneOfExampleFormData(
     xxx2: string;
   },
 ) {
-  return formRoot<TOneOfExampleForm>({
+  return formRoot<TFormDataToFormGenerator<TOneOfExampleForm>>({
     formId: rootFormId,
     validations: [] as any,
     childrenFactories: [

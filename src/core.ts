@@ -1,49 +1,49 @@
-//@ts-nocheck
 import { getFormRootId, isPrimitiveValueField } from './utils';
-import { TForm, TFormFieldData } from './types';
+import { TFormData, TFormFieldData, TFormValidator } from './types';
 
-export function validateForm<T extends TForm>(formData: T): T {
+export function validateForm<T extends TFormData>(validator: TFormValidator<T>, formData: T): T {
   const formRootId = getFormRootId(formData);
-  return doValidateForm(formRootId, formData);
+  return doValidateForm(validator, formRootId, formData);
 }
 
-export function validateSelfAndParents<T extends TForm>(data: T, id: string): T {
-  return iterateToRoot(validateField, id, data);
+export function validateSelfAndParents<T extends TFormData>(validator: TFormValidator<T>, data: T, id: string): T {
+  return iterateToRoot(validateField, id, data, validator,);
 }
 
-export function setSelfAndParentsTouched<T extends TForm>(data: T, id: string): T {
+export function setSelfAndParentsTouched<T extends TFormData>(data: T, id: string): T {
   return iterateToRoot(setFieldTouched, id, data);
 }
 
-export function findFirstErrorToShow<T extends TForm>(data: T, id: string): T {
+export function findFirstErrorToShow<T extends TFormData>(data: T, id: string): T {
   return iterateToRoot(findErrorToShow, id, data);
 }
 
 //*******//
 
-function doValidateForm<T extends TForm>(id: string, formData: T): T {
+function doValidateForm<T extends TFormData>(validator: TFormValidator<T>, id: string, formData: T): T {
   const newData = formData[id].children.reduce((acc, childId) => {
-    return doValidateForm(childId, acc);
+    return doValidateForm(validator, childId, acc);
   }, formData);
 
-  const [validatedField, _continueIteration] = validateField(id, newData);
-
+  const [validatedField, _continueIteration] = validateField(id, newData, validator);
+  console.log("validatedField", validatedField)
   return {
     ...newData,
     [id]: validatedField,
   };
 }
 
-function validateField<T extends TForm>(id: string, data: T): [TFormFieldData, boolean] {
+function validateField<T extends TFormData>(id: string, data: T, validator: TFormValidator<T>): [TFormFieldData, boolean] {
   const fieldData = data[id];
-  let errors:any[] = [];
+  let errors: any[] = [];
 
   if (isPrimitiveValueField(fieldData) && !fieldData.isRequiredField && fieldData.value.trim() === '') {
     /*don't run validations on optional fields if they are empty*/
     errors = [];
   } else {
-    for (const validationFn of fieldData.validations) {
-      const validationResult = validationFn(id, data);
+    const validations = validator[id]
+    for (const validationFn of validations) {
+      const validationResult = validationFn(id, data as any);
       if (validationResult) {
         errors = [validationResult];
         break;
@@ -60,7 +60,7 @@ function validateField<T extends TForm>(id: string, data: T): [TFormFieldData, b
   ];
 }
 
-function setFieldTouched<T extends TForm>(id: string, data: T): [TFormFieldData, boolean] {
+function setFieldTouched<T extends TFormData>(id: string, data: T): [TFormFieldData, boolean] {
   return [
     {
       ...data[id],
@@ -70,7 +70,7 @@ function setFieldTouched<T extends TForm>(id: string, data: T): [TFormFieldData,
   ];
 }
 
-function findErrorToShow<T extends TForm>(id: string, data: T): [TFormFieldData, boolean] {
+function findErrorToShow<T extends TFormData>(id: string, data: T): [TFormFieldData, boolean] {
   const fieldData = data[id];
   const showError = Boolean(fieldData.errors.length) && fieldData.touched;
   return [
@@ -82,12 +82,13 @@ function findErrorToShow<T extends TForm>(id: string, data: T): [TFormFieldData,
   ];
 }
 
-function iterateToRoot<T extends TForm>(
-  fieldTransformatonFn: (id: string, data: TForm) => [TFormFieldData, boolean],
-  id: string,
-  data: T,
-):any {
-  const [fieldTransformationResult, continueIteration] = fieldTransformatonFn(id, data);
+function iterateToRoot<T extends TFormData, F extends (...args: any[]) => [TFormFieldData, boolean]>(
+  ...args: [fieldTransformatonFn: F, id: string, data: T, ...rest: Omit<Parameters<F>,"id"|"data">]
+): any {
+
+  const [fieldTransformatonFn, id, data, ...rest] = args
+
+  const [fieldTransformationResult, continueIteration] = fieldTransformatonFn(id, data, ...rest);
 
   const newData = {
     ...data,
@@ -97,7 +98,7 @@ function iterateToRoot<T extends TForm>(
   if (continueIteration) {
     const parentId = getParentPath(id);
 
-    return parentId ? iterateToRoot(fieldTransformatonFn, parentId, newData) : newData;
+    return parentId ? iterateToRoot(fieldTransformatonFn, parentId, newData, ...rest) : newData;
   } else {
     return newData;
   }

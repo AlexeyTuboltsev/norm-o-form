@@ -1,7 +1,8 @@
 import produce from "immer";
-import { handleFormChange, TSelectInputData, TTextInputData, validateForm } from "formality";
+import { handleFormChange, TFormData, TFormGenerator, TSelectInputData, TTextInputData, validateForm } from "formality";
 import { generateOneOfExampleFormData, initialFormValues } from "./formDataGenerator";
-import { GetReturnType } from "./utils";
+import { GetReturnType, TFormDataToFormGenerator } from "./utils";
+import { TFormFieldData, TValidationFn } from "formality/types";
 
 export type TOneOfExampleForm = {
   'oneOfExampleForm.appName': TTextInputData;
@@ -41,17 +42,37 @@ export const formActions = {
   }),
 }
 
+type TFormValidator<T extends TFormData> = {[I in keyof T]:TValidationFn[]}
+
+type TValidatorAndFormData<T extends TFormData> = {validator: TFormValidator<T>, formDataGenerator: T}
+
+function extractValidatorAndFormData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formDataGenerator: T} {
+  return Object.keys(formGenerator).reduce((acc:TValidatorAndFormData<T>, id:keyof T) => {
+    acc.validator[id] = [...formGenerator[id].validations]
+    acc.formDataGenerator[id] = { ...formGenerator[id] } as any
+    delete (acc.formDataGenerator[id] as any).validations
+
+    return acc
+  },{
+    validator: {},
+    formDataGenerator: {}
+  } as  TValidatorAndFormData<T>)
+}
 
 export const ONE_OF_EXAMPLE_FORM_ROOT = 'oneOfExampleForm';
 
-type A = GetReturnType<typeof formActions>
+
+const { validator, formDataGenerator } = extractValidatorAndFormData(
+  generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues)
+)
 
 
 export const formReducer = (state: TFormReducer = initialState, action: GetReturnType<typeof formActions>) => {
   return produce(state, draftState => {
     switch (action.type) {
       case EFormActionType.OPEN_FORM:
-        draftState.oneOfExampleForm = validateForm(generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues))
+        console.log(formDataGenerator)
+        draftState.oneOfExampleForm = validateForm(validator,formDataGenerator)
         break;
       case EFormActionType.CLOSE_FORM:
         draftState.oneOfExampleForm = undefined
@@ -61,7 +82,7 @@ export const formReducer = (state: TFormReducer = initialState, action: GetRetur
           switch (action.payload.updateType) {
             case EFormUpdateType.CHANGE: {
               const formData = draftState.oneOfExampleForm
-              handleFormChange(formData, action.payload.fieldId, action.payload.value)
+              handleFormChange(validator,formData, action.payload.fieldId, action.payload.value)
               break;
             }
             default:

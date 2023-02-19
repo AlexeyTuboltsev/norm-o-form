@@ -13,7 +13,6 @@ export type TGeneralFormData = {
   showError: boolean;
   touched: boolean;
   isRequiredField: boolean;
-  validations: TValidationFn[];
 };
 
 export enum EFormTypes {
@@ -61,12 +60,24 @@ export type TOneOfData = { type: EFormTypes.ONE_OF; value: string } & TGeneralFo
 
 export type TFormFieldData =
   | TRootFormData
+  | TValidationGroupData
   | TTextInputData
   | TSelectInputData
-  | TValidationGroupData
   | TIntegerInputData
   | TArrayData
   | TOneOfData
   | TSelectTagInputData;
 
-export type TForm = { [key: string]: TFormFieldData };
+export type TFormFieldGenerator =
+  (| TRootFormData
+  | TValidationGroupData
+  | TTextInputData
+  | TSelectInputData
+  | TIntegerInputData
+  | TArrayData
+  | TOneOfData
+  | TSelectTagInputData) & {validations: TValidationFn[]}
+
+export type TFormData = { [key: string]: TFormFieldData };
+export type TFormGenerator = { [key: string]: TFormFieldGenerator };
+export type TFormValidator<T> = {[I in keyof T]:TValidationFn[]}

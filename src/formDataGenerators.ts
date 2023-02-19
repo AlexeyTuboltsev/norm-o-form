@@ -1,10 +1,10 @@
-import { EFormTypes, TForm, TTextInputData, TValidationFn } from './types';
+import { EFormTypes, TFormData, TTextInputData, TValidationFn } from './types';
 import { childrenAreValid } from './validators';
 import { generateRandomString } from './utils';
 
 
-export function formRoot<T extends TForm>({ formId, validations, childrenFactories }:
-  {formId: string,validations:TValidationFn,childrenFactories:Array<(parentId?: string)=>TForm>}
+export function formRoot<T extends TFormData>({ formId, validations, childrenFactories }:
+  {formId: string,validations:TValidationFn,childrenFactories:Array<(parentId?: string)=>TFormData>}
 ):T {
   const { children, childrenPaths } = generateChildren(childrenFactories, formId);
 
@@ -61,7 +61,7 @@ export function array({ path, validations, memberFactory, value }:any) {
   };
 }
 
-export function validationGroup<T extends TForm>({
+export function validationGroup<T extends TFormData>({
   path,
   validations,
   childrenFactories,
@@ -178,7 +178,7 @@ export function numericInput({
   path: string;
   value: string;
   isRequiredField: boolean;
-  validations: ((id: string, data:TForm) => undefined | string)[];
+  validations: ((id: string, data:TFormData) => undefined | string)[];
 }) {
   return function (parentPath?: string) {
     const fullPath = generateFullPath(path, parentPath);
@@ -237,7 +237,7 @@ export function selectTag({
   isRequiredField: boolean;
   parentPath: string;
   options: { key: string; label: string }[];
-  validations: ((id: string, data:TForm) => undefined | string)[];
+  validations: ((id: string, data:TFormData) => undefined | string)[];
 }) {
   return function (parentPath?: string) {
     const fullPath = generateFullPath(path, parentPath);
@@ -263,7 +263,7 @@ function generateFullPath(path: string, parentPath?: string): string {
   return parentPath ? `${parentPath}.${path}` : path;
 }
 
-export function generateChildren<T extends TForm>(childrenFactories:Array<(parentId?: string)=>T>, fullPath:string):{children: TForm,childrenPaths: string[]} {
+export function generateChildren<T extends TFormData>(childrenFactories:Array<(parentId?: string)=>T>, fullPath:string):{children: TFormData,childrenPaths: string[]} {
   return childrenFactories.reduce(
     (acc:any, childFactory:any) => {
       const child = childFactory(fullPath);
