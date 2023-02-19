@@ -1,15 +1,9 @@
 import produce from "immer";
-import { handleFormChange, TFormData, TFormGenerator, TSelectInputData, TTextInputData, validateForm } from "formality";
-import { generateOneOfExampleFormData, initialFormValues } from "./formDataGenerator";
+import { handleFormChange, TFormData, validateForm } from "norm-o-form";
+import { generateOneOfExampleFormData, initialFormValues, TOneOfExampleForm } from "./formDataGenerator";
 import { GetReturnType, TFormDataToFormGenerator } from "./utils";
-import { TFormFieldData, TValidationFn } from "formality/types";
+import { EFormTypes, TValidationFn } from "norm-o-form/types";
 
-export type TOneOfExampleForm = {
-  'oneOfExampleForm.appName': TTextInputData;
-  'oneOfExampleForm.appVersion': TSelectInputData;
-  'oneOfExampleForm.email': TTextInputData;
-  'oneOfExampleForm.deviceId': TTextInputData;
-};
 
 export type TFormReducer = {
   oneOfExampleForm?: (TOneOfExampleForm)
@@ -49,6 +43,13 @@ type TValidatorAndFormData<T extends TFormData> = {validator: TFormValidator<T>,
 function extractValidatorAndFormData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formDataGenerator: T} {
   return Object.keys(formGenerator).reduce((acc:TValidatorAndFormData<T>, id:keyof T) => {
     acc.validator[id] = [...formGenerator[id].validations]
+
+    if(formGenerator[id].type === EFormTypes.ONE_OF){
+      for(const variant in (formGenerator[id] as any).variants){
+
+      }
+    }
+
     acc.formDataGenerator[id] = { ...formGenerator[id] } as any
     delete (acc.formDataGenerator[id] as any).validations
 

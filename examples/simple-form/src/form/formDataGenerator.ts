@@ -7,10 +7,8 @@ import {
   maxLength,
   oneOf,
   select,
-  textInput, TFormData, TFormGenerator
-} from "formality";
-import { TOneOfExampleForm } from "./formReducer";
-import { TValidationFn } from "formality/types";
+  textInput, TFormData, TFormGenerator, TSelectInputData, TTextInputData
+} from "norm-o-form";
 import { TFormDataToFormGenerator } from "./utils";
 
 
@@ -18,6 +16,18 @@ export enum EOneOfType {
   option1 = 'option1',
   option2 = 'option2',
 }
+
+export type TOneOfExampleForm = {
+  'oneOfExampleForm.appName': TTextInputData;
+  'oneOfExampleForm.appVersion': TSelectInputData;
+  'oneOfExampleForm.email': TTextInputData;
+  'oneOfExampleForm.deviceId': TTextInputData;
+  'oneOfExampleForm.type': TTextInputData;
+  // 'oneOfExampleForm.variants'
+  // 'oneOfExampleForm.variants.type': TTextInputData;
+  // 'oneOfExampleForm.variants.xxx1': TTextInputData;
+  // 'oneOfExampleForm.variants.xxx2': TTextInputData;
+};
 
 export const initialFormValues = {
   appName: 'xxx',

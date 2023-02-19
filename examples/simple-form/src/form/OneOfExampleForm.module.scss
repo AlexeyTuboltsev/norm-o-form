@@ -1,0 +1,9 @@
+.variantContainer {
+  grid-column: 1 / span 2;
+
+  display: grid;
+  grid-template: 1fr / 180px 1fr;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  column-gap: 16px;
+}

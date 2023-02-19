@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from './FormWrapper.module.scss';
-import { EFormUpdateType, formActions, TFormUpdate, TOneOfExampleForm } from "./formReducer";
+import { EFormUpdateType, formActions, TFormUpdate } from "./formReducer";
 import { useDispatch } from "react-redux";
+import { TOneOfExampleForm } from "./formDataGenerator";
 
 function noop() {
   return undefined
