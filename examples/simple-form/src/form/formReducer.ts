@@ -61,7 +61,8 @@ export const formReducer = (state: TFormReducer = initialState, action: GetRetur
           switch (action.payload.updateType) {
             case EFormUpdateType.CHANGE: {
               const formData = draftState.oneOfExampleForm
-              handleFormChange(validator,formData, action.payload.fieldId, action.payload.value)
+              draftState.oneOfExampleForm = handleFormChange(validator,formData, action.payload.fieldId, action.payload.value)
+
               break;
             }
             default:

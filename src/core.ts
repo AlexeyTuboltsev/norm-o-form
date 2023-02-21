@@ -21,12 +21,12 @@ export function findFirstErrorToShow<T extends TFormData>(data: T, id: string): 
 //*******//
 
 function doValidateForm<T extends TFormData>(validator: TFormValidator<T>, id: string, formData: T): T {
+
   const newData = formData[id].children.reduce((acc, childId) => {
     return doValidateForm(validator, childId, acc);
   }, formData);
 
   const [validatedField, _continueIteration] = validateField(id, newData, validator);
-  console.log("validatedField", validatedField)
   return {
     ...newData,
     [id]: validatedField,
@@ -107,4 +107,19 @@ function iterateToRoot<T extends TFormData, F extends (...args: any[]) => [TForm
 export function getParentPath(id: string) {
   const idAsArray = id.split('.').slice(0, -1);
   return idAsArray.length ? idAsArray.join('.') : null;
+}
+
+
+export function separateFormFunctionsAndData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formDataGenerator: T} {
+  return Object.keys(formGenerator).reduce((acc:TValidatorAndFormData<T>, id:keyof T) => {
+    acc.validator[id] = [...formGenerator[id].validations]
+
+    acc.formDataGenerator[id] = { ...formGenerator[id] } as any
+    delete (acc.formDataGenerator[id] as any).validations
+
+    return acc
+  },{
+    validator: {},
+    formDataGenerator: {}
+  } as  TValidatorAndFormData<T>)
 }

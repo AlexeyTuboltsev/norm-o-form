@@ -1,4 +1,3 @@
-
 import {
   formRoot,
   isGeoCoordinate,
@@ -7,9 +6,11 @@ import {
   maxLength,
   oneOf,
   select,
-  textInput, TFormData, TFormGenerator, TSelectInputData, TTextInputData
+  textInput,
+  TSelectInputData,
+  TTextInputData
 } from "norm-o-form";
-import { TFormDataToFormGenerator } from "./utils";
+import { TFormDataToFormGenerator } from "norm-o-form/types";
 
 
 export enum EOneOfType {
