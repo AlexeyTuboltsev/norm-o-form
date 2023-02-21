@@ -1,8 +1,8 @@
 import produce from "immer";
-import { handleFormChange, TFormData, validateForm } from "norm-o-form";
+import { handleFormChange, TFormData, validateForm, separateFormFunctionsAndData,EFormTypes, TValidationFn } from "norm-o-form";
 import { generateOneOfExampleFormData, initialFormValues, TOneOfExampleForm } from "./formDataGenerator";
-import { GetReturnType, TFormDataToFormGenerator } from "./utils";
-import { EFormTypes, TValidationFn } from "norm-o-form/types";
+import { GetReturnType } from "./utils";
+
 
 
 export type TFormReducer = {
@@ -38,32 +38,10 @@ export const formActions = {
 
 type TFormValidator<T extends TFormData> = {[I in keyof T]:TValidationFn[]}
 
-type TValidatorAndFormData<T extends TFormData> = {validator: TFormValidator<T>, formDataGenerator: T}
-
-function extractValidatorAndFormData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formDataGenerator: T} {
-  return Object.keys(formGenerator).reduce((acc:TValidatorAndFormData<T>, id:keyof T) => {
-    acc.validator[id] = [...formGenerator[id].validations]
-
-    if(formGenerator[id].type === EFormTypes.ONE_OF){
-      for(const variant in (formGenerator[id] as any).variants){
-
-      }
-    }
-
-    acc.formDataGenerator[id] = { ...formGenerator[id] } as any
-    delete (acc.formDataGenerator[id] as any).validations
-
-    return acc
-  },{
-    validator: {},
-    formDataGenerator: {}
-  } as  TValidatorAndFormData<T>)
-}
-
 export const ONE_OF_EXAMPLE_FORM_ROOT = 'oneOfExampleForm';
 
 
-const { validator, formDataGenerator } = extractValidatorAndFormData(
+const { validator, formDataGenerator } = separateFormFunctionsAndData<TOneOfExampleForm>(
   generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues)
 )
 
@@ -73,7 +51,7 @@ export const formReducer = (state: TFormReducer = initialState, action: GetRetur
     switch (action.type) {
       case EFormActionType.OPEN_FORM:
         console.log(formDataGenerator)
-        draftState.oneOfExampleForm = validateForm(validator,formDataGenerator)
+        draftState.oneOfExampleForm = validateForm<TOneOfExampleForm>(validator,formDataGenerator)
         break;
       case EFormActionType.CLOSE_FORM:
         draftState.oneOfExampleForm = undefined

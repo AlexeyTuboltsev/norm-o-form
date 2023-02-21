@@ -14,7 +14,9 @@ import {
   TSelectInputData,
   TTextInputData,
   TFormGenerator,
-  TFormValidator
+  TFormValidator,
+  EFormTypes,
+  TValidationFn
 } from "./types"
 import {
   isNotEmpty,
@@ -23,16 +25,21 @@ import {
   isGeoCoordinate,
 } from "./validators"
 import {
-  validateForm
+  validateForm,
+  separateFormFunctionsAndData
 } from "./core"
 import {
   handleFormChange,
   handleFormBlur,
 } from "./handlers"
-
+import {
+  formDataToButtonState,
+  getFormRoot,
+} from "./utils"
 
 export {
   validateForm,
+  separateFormFunctionsAndData,
   formRoot,
   array,
   validationGroup,
@@ -51,9 +58,14 @@ export {
   isValidEmailAddress,
   isGeoCoordinate,
 
+  formDataToButtonState,
+  getFormRoot,
+
   type TFormData,
   type TFormGenerator,
   type TSelectInputData,
   type TTextInputData,
-  type TFormValidator
+  type TFormValidator,
+  type EFormTypes,
+  type TValidationFn
 }

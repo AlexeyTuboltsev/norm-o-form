@@ -1,4 +1,3 @@
-//@ts-nocheck
 import {
   EButtonState,
   EFormTypes,
@@ -9,7 +8,7 @@ import {
   TTextInputData,
 } from './types';
 
-export function formDataToButtonState(formData) {
+export function formDataToButtonState<T extends TFormFieldData>(formData:T) {
   return formData.errors.length ? EButtonState.DISABLED : EButtonState.ACTIVE;
 }
 
@@ -21,7 +20,7 @@ export function getFormRoot<T extends TFormFieldData>(formData: TFormData): T {
       break;
     }
   }
-  return rootField;
+  return rootField as T; // TODO, root is guaranteed to be there, fix typings.
 }
 
 export function getFormRootId<T extends TFormData>(formData: T): string {
@@ -32,7 +31,7 @@ export function getFormRootId<T extends TFormData>(formData: T): string {
       break;
     }
   }
-  return rootFieldId;
+  return rootFieldId as string; // TODO, root is guaranteed to be there, fix typings.
 }
 
 export function isPrimitiveValueField(

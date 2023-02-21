@@ -8,9 +8,7 @@
 
   },
   "scripts": {
-    "start": "scripts/devCopyEnvironmentVariables.sh && VERSION=$(cat .version) react-scripts start",
-    "start-win": "react-scripts start",
-    "generate-apis": "scripts/generate-openapi-clients.sh",
+    "build:install:dev": "tsc && cd examples/simple-form && rm -fr node_modules/norm-o-form &&  yarn install --check-files && cd ../..",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",

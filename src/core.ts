@@ -1,5 +1,5 @@
 import { getFormRootId, isPrimitiveValueField } from './utils';
-import { TFormData, TFormFieldData, TFormValidator } from './types';
+import { TFormData, TFormDataToFormGenerator, TFormFieldData, TFormValidator, TValidatorAndFormData } from './types';
 
 export function validateForm<T extends TFormData>(validator: TFormValidator<T>, formData: T): T {
   const formRootId = getFormRootId(formData);
