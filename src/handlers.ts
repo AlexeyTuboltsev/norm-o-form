@@ -5,31 +5,40 @@ import {
   validateSelfAndParents,
 } from './core';
 import { EFormTypes, TFormData, TFormValidator, TOneOfData, TSelectTagInputData } from './types';
-import {  isPrimitiveValueField } from './utils';
+import { isPrimitiveValueField } from './utils';
 
-function chooseOneOf<T extends TFormData>(oldValidator: TFormValidator<T>, formData:T, fieldData:TSelectTagInputData, value:string):T {
-  const oneOf = formData[fieldData.parentPath] as TOneOfData;
+function chooseOneOf<T extends TFormData>(
+  oldValidator: TFormValidator<T>,
+  oldFormData: T,
+  fieldData: TSelectTagInputData, value: string
+): { validator: TFormValidator<T>, formData: T } {
+  const oneOf = oldFormData[fieldData.parentPath] as TOneOfData;
 
   oneOf.children.forEach((childPath) => {
-    delete formData[childPath];
+    delete oldFormData[childPath];
   });
 
   oneOf.children = oneOf.variants[value].childrenPaths;
   oneOf.value = value;
 
-  const {validator} = separateFormFunctionsAndData(oneOf.variants[value].children)
-
+  const { validator, formData } = separateFormFunctionsAndData(oneOf.variants[value].children)
   const updatedValidator = {
     ...oldValidator,
     ...validator
   }
 
-  return validateForm(
-    updatedValidator as any, //TODO
-    {
+  const updatedFormData = {
+    ...oldFormData,
     ...formData,
-    ...oneOf.variants[value].children,
-  });
+  }
+
+  console.log("validator", validator, updatedValidator)
+  return {
+    validator: updatedValidator,
+    formData: validateForm(
+      updatedValidator as any, //TODO
+      updatedFormData)
+  }
 }
 
 // export function addArrayMember(arrayId: string, place: number, intialValue, formData) {
@@ -87,23 +96,32 @@ function chooseOneOf<T extends TFormData>(oldValidator: TFormValidator<T>, formD
 //   return findFirstErrorToShow(setSelfAndParentsTouched(formDataValidated, arrayId), arrayId);
 // }
 
-export function handleFormChange<T extends TFormData>(validator: TFormValidator<T>, formData: T, id: string, value:any):T {
+export function handleFormChange<T extends TFormData>(validator: TFormValidator<T>, formData: T, id: string, value: any): { validator: TFormValidator<T>, formData: T } {
   const fieldData = formData[id];
   if (fieldData.type === EFormTypes.SELECT_TAG) {
-    const newFormData = chooseOneOf<T>(validator, formData, fieldData, value);
+    const { validator: newValidator, formData: newFormData } = chooseOneOf<T>(validator, formData, fieldData, value);
 
     const validatedFormData = validateSelfAndParents<T>(validator, newFormData, id);
-    return setSelfAndParentsTouched<T>(validatedFormData, id);
+    return {
+      validator: newValidator,
+      formData: setSelfAndParentsTouched<T>(validatedFormData, id)
+    }
+
   } else if (isPrimitiveValueField(fieldData)) {
     fieldData.value = value;
-
     const validatedFormData = validateSelfAndParents(validator, formData, id);
-    return setSelfAndParentsTouched(validatedFormData, id);
+    return {
+      validator,
+      formData: setSelfAndParentsTouched(validatedFormData, id)
+    };
   } else {
-    return formData
+    return {
+      validator,
+      formData
+    }
   }
 }
 
-export function handleFormBlur<T extends TFormData>(formData:T, id:string):T {
+export function handleFormBlur<T extends TFormData>(formData: T, id: string): T {
   return findFirstErrorToShow(formData, id);
 }

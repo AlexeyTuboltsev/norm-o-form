@@ -4,16 +4,8 @@ import { EFormUpdateType, formActions, TFormUpdate } from "./formReducer";
 import { useDispatch } from "react-redux";
 import { TOneOfExampleForm } from "./formDataGenerator";
 
-function noop() {
-  return undefined
-}
-
 type TFormWrapperProps<T> = {
   formId: string;
-  // onChange: (formUpdate: TFormUpdate) => void,
-  onFocus?: (id: string, val: string) => void,
-  onBlur?: (id: string, val: string) => void,
-  onPaste?: (id: string, val: string) => void,
 };
 
 
@@ -21,36 +13,34 @@ export const FormWrapper: React.FunctionComponent<TFormWrapperProps<TOneOfExampl
   & { children?: React.ReactNode }> = ({
   formId,
   children,
-  // onChange,
-  onBlur,
-  onFocus,
-  onPaste,
 }) => {
   const dispatch = useDispatch()
+  const action = (value: string, fieldId: string, updateType: EFormUpdateType) =>
+    formActions.updateForm({
+      formId,
+      value,
+      fieldId,
+      updateType
+    })
 
   return <div
     className={styles.formContainer}
-    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-
-      dispatch(formActions.updateForm({
-        formId,
-        value: event.target.value,
-        fieldId: event.target.id,
-        updateType: EFormUpdateType.CHANGE
-      }))
-    }
-    onBlur={onBlur ? (event: React.FocusEvent<HTMLInputElement>) => {
+    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
       event.stopPropagation();
-      onBlur(event.currentTarget.id, event.currentTarget.value)
-    } : noop}
-    onFocus={onFocus ? (event: React.FocusEvent<HTMLInputElement>) => {
+      dispatch(action(event.target.value, event.target.id, EFormUpdateType.CHANGE))
+    }}
+    onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
       event.stopPropagation();
-      onFocus(event.currentTarget.id, event.currentTarget.value)
-    } : noop}
-    onPaste={onPaste ? (event: React.ClipboardEvent<HTMLInputElement>) => {
+      dispatch(action(event.target.value, event.target.id, EFormUpdateType.BLUR))
+    }}
+    onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
       event.stopPropagation();
-      onPaste(event.currentTarget.id, event.currentTarget.value)
-    } : noop}
+      dispatch(action(event.target.value, event.target.id, EFormUpdateType.FOCUS))
+    }}
+    onPaste={(event: React.ClipboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      dispatch(action(event.currentTarget.value, event.currentTarget.id, EFormUpdateType.PASTE))
+    }}
   >
     {children}
   </div>

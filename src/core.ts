@@ -110,16 +110,16 @@ export function getParentPath(id: string) {
 }
 
 
-export function separateFormFunctionsAndData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formDataGenerator: T} {
+export function separateFormFunctionsAndData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formData: T} {
   return Object.keys(formGenerator).reduce((acc:TValidatorAndFormData<T>, id:keyof T) => {
     acc.validator[id] = [...formGenerator[id].validations]
 
-    acc.formDataGenerator[id] = { ...formGenerator[id] } as any
-    delete (acc.formDataGenerator[id] as any).validations
+    acc.formData[id] = { ...formGenerator[id] } as any
+    delete (acc.formData[id] as any).validations
 
     return acc
   },{
     validator: {},
-    formDataGenerator: {}
+    formData: {}
   } as  TValidatorAndFormData<T>)
 }

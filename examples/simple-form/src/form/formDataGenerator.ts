@@ -10,7 +10,7 @@ import {
   TSelectInputData,
   TTextInputData
 } from "norm-o-form";
-import { TFormDataToFormGenerator } from "norm-o-form/types";
+import { TFormDataToFormGenerator, TRootFormData } from "norm-o-form/types";
 
 
 export enum EOneOfType {
@@ -19,6 +19,7 @@ export enum EOneOfType {
 }
 
 export type TOneOfExampleForm = {
+  'oneOfExampleForm':TRootFormData;
   'oneOfExampleForm.appName': TTextInputData;
   'oneOfExampleForm.appVersion': TSelectInputData;
   'oneOfExampleForm.email': TTextInputData;
@@ -124,9 +125,9 @@ export function generateOneOfExampleFormData(
             children: [
               textInput({
                 id: 'xxx1',
-                validations: [isValidEmailAddress({ errorMessage: 'xxx1 is not an email' })],
+                validations: [isValidEmailAddress({ errorMessage: 'xxx1 does not contain a valid email' })],
                 value: initialValues.xxx1 || '',
-                isRequiredField: false,
+                isRequiredField: true,
               }),
               textInput({
                 id: 'xxx2',

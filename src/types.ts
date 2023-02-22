@@ -82,5 +82,5 @@ export type TFormData = { [key: string]: TFormFieldData };
 export type TFormGenerator = { [key: string]: TFormFieldGenerator };
 export type TFormValidator<T> = {[I in keyof T]:TValidationFn[]}
 
-export type TValidatorAndFormData<T extends TFormData> = {validator: TFormValidator<T>, formDataGenerator: T}
+export type TValidatorAndFormData<T extends TFormData> = {validator: TFormValidator<T>, formData: T}
 export type TFormDataToFormGenerator<T extends TFormData> = {[I in keyof T]:T[I]&{validations: TValidationFn[]}}

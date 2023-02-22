@@ -14,21 +14,18 @@ type TSelectInput = {
   style?: { [key: string]: string };
 };
 
-export const SelectInput: React.FunctionComponent<TSelectInput> = (props) => {
-  const {
-    id,
-    value,
-    options,
-    touched,
-    isRequiredField,
-    showError,
-    label,
-    style,
-    disabled = false,
-  } = props;
-
-  return (
-    <div className={styles.formFieldContainer}>
+export const SelectInput: React.FunctionComponent<TSelectInput> = ({
+  id,
+  value,
+  options,
+  touched,
+  isRequiredField,
+  showError,
+  label,
+  style,
+  errors,
+  disabled = false,
+}) => <div className={styles.formFieldContainer}>
       {label && (
         <label className={value ? styles.labelActive : styles.label}>{`${label}${isRequiredField ? ' *' : ''}`}</label>
       )}
@@ -48,7 +45,5 @@ export const SelectInput: React.FunctionComponent<TSelectInput> = (props) => {
         ))}
       </select>
 
-      {showError && touched && <div className="error">{props.errors}</div>}
+      {showError && touched && <div className="error">{errors}</div>}
     </div>
-  );
-};

@@ -1,4 +1,6 @@
 $gray-color: #adadad;
+$error-message-color: #ad1919;
+$error-color: #9d1616;
 
 .formFieldContainer {
   box-sizing: border-box;
@@ -21,6 +23,10 @@ $gray-color: #adadad;
     outline: none;
   }
 
+  input.error {
+    border: 1px solid $error-color;
+  }
+
 
   select {
     width: 100%;
@@ -38,11 +44,8 @@ $gray-color: #adadad;
       left: 10px;
 
       font-size: 12px;
-
     }
   }
-
-
 }
 
 .label {
@@ -72,4 +75,10 @@ $gray-color: #adadad;
   background-color: #FFFFFF;
 
   pointer-events: none;
+}
+
+.error {
+  font-size: 13px;
+  color: $error-message-color;
+  text-align: right;
 }

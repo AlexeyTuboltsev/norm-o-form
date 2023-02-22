@@ -34,7 +34,7 @@ export const TextInput: React.FunctionComponent<TTextInputProps> = ({
         disabled={disabled}
         onChange={()=>undefined}
       />
-      {showError && touched && <div className="error">{errors}</div>}
+      {showError && touched && <div className={styles.error}>{errors}</div>}
     </div>
   );
 };

@@ -6,19 +6,28 @@ import { SelectInput } from "./SelectInput";
 import { connect } from "react-redux";
 import styles from "./OneOfExampleForm.module.scss"
 import { EOneOfType, TOneOfExampleForm } from "./formDataGenerator";
+import { TFormFieldData } from "norm-o-form/types";
 
-type TOneOfExampleFormProps<T> = {
+type TFormWrapperProps<T> = {
   formId: string;
   formData: T;
 }
 
-export const OneOfExampleForm: React.FunctionComponent<TOneOfExampleFormProps<TOneOfExampleForm>> = ({
+const FormError = ({ fieldData, style }: { fieldData: TFormFieldData, style?:string }) => {
+  const error = fieldData.errors[0]
+  return error
+    ? <div className={style}>{error}</div>
+    : null
+}
+
+export const OneOfExampleForm: React.FunctionComponent<TFormWrapperProps<TOneOfExampleForm>> = ({
   formId,
   formData,
 }) =>
   <FormWrapper
     formId={formId}
   >
+    {/*<FormError fieldData={formData["oneOfExampleForm"]} />*/}
     < TextInput
       {...formData["oneOfExampleForm.appName"]}
       label="appName"
@@ -42,11 +51,11 @@ export const OneOfExampleForm: React.FunctionComponent<TOneOfExampleFormProps<TO
       />
 
       {(formData as any)['oneOfExampleForm.variants.type'].value === EOneOfType.option1 ? (
-        <TextInput {...(formData as any)['oneOfExampleForm.variants.zzz']} label="zzz"  />
+        <TextInput {...(formData as any)['oneOfExampleForm.variants.zzz']} label="zzz" />
       ) : (
         <>
-          <TextInput {...(formData as any)['oneOfExampleForm.variants.xxx1']} label="xxx1"  />
-          <TextInput {...(formData as any)['oneOfExampleForm.variants.xxx2']} label="xxx2"  />
+          <TextInput {...(formData as any)['oneOfExampleForm.variants.xxx1']} label="xxx1" />
+          <TextInput {...(formData as any)['oneOfExampleForm.variants.xxx2']} label="xxx2" />
         </>
       )}
     </div>
