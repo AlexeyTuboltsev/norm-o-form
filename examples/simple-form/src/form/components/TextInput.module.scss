@@ -1,5 +1,4 @@
-@import "src/common.scss";
-
+@import "src/common";
 
 .formFieldContainer {
   box-sizing: border-box;
@@ -38,11 +37,14 @@
   }
 
   &:focus-within {
+    border: 1px solid $blue-color;
+
     label {
       top: -7px;
       left: 10px;
 
       font-size: 12px;
+      color: $blue-color;
     }
   }
 }

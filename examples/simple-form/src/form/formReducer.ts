@@ -20,7 +20,8 @@ export type TFormReducer = {
 export enum EFormActionType {
   OPEN_FORM = "formAction.openForm",
   CLOSE_FORM = "formAction.closeForm",
-  UPDATE_FORM = "updateForm"
+  SUBMIT_FORM = "formAction.submitForm",
+  UPDATE_FORM = "formAction.updateForm",
 }
 
 
@@ -38,6 +39,7 @@ const initialState: TFormReducer = {}
 export const formActions = {
   openForm: () => ({ type: EFormActionType.OPEN_FORM as const }),
   closeForm: () => ({ type: EFormActionType.CLOSE_FORM as const }),
+  submitForm: () => ({ type: EFormActionType.SUBMIT_FORM as const }),
   updateForm: (payload: TFormUpdate) => ({
     type: EFormActionType.UPDATE_FORM as const,
     payload

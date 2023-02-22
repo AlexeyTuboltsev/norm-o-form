@@ -7,6 +7,8 @@
 }
 
 .formContainer {
+  width: 100%;
+
   display: grid;
   grid-template: auto auto 1fr / 1fr;
   grid-gap: 16px;

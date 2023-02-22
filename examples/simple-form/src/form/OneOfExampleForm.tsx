@@ -1,10 +1,12 @@
 import { FormWrapper } from "./FormWrapper";
-import { TextInput } from "./TextInput";
+import { TextInput } from "./components/TextInput";
 import React from "react";
-import { SelectInput } from "./SelectInput";
+import { SelectInput } from "./components/SelectInput";
 import styles from "./OneOfExampleForm.module.scss"
 import { EOneOfType, TOneOfExampleForm } from "./formDataGenerator";
-import { TFormFieldData } from "norm-o-form/types";
+import { EButtonState, TFormFieldData } from "norm-o-form/types";
+import { CancelFormButton, SubmitFormButton } from "./components/Button";
+import { formDataToButtonState } from "norm-o-form";
 
 type TFormWrapperProps<T> = {
   formId: string;
@@ -57,5 +59,8 @@ export const OneOfExampleForm: React.FunctionComponent<TFormWrapperProps<TOneOfE
         </>
       )}
     </div>
-
+  <div className={styles.buttonWrapper}>
+    <CancelFormButton />
+    <SubmitFormButton buttonState={formDataToButtonState(formData["oneOfExampleForm"])}/>
+  </div>
   </FormWrapper>

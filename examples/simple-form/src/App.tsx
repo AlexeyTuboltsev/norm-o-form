@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToggleFormButton } from "./form/Button";
+import { ToggleFormButton } from "./form/components/Button";
 import { useSelector } from "react-redux";
 import { ONE_OF_EXAMPLE_FORM_ROOT, selectFormState } from "./form/formReducer";
 import { OneOfExampleForm } from "./form/OneOfExampleForm";
