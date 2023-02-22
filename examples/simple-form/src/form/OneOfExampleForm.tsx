@@ -1,9 +1,7 @@
 import { FormWrapper } from "./FormWrapper";
-import { EFormUpdateType, formActions, TFormUpdate } from "./formReducer";
 import { TextInput } from "./TextInput";
 import React from "react";
 import { SelectInput } from "./SelectInput";
-import { connect } from "react-redux";
 import styles from "./OneOfExampleForm.module.scss"
 import { EOneOfType, TOneOfExampleForm } from "./formDataGenerator";
 import { TFormFieldData } from "norm-o-form/types";
