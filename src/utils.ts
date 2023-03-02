@@ -3,6 +3,7 @@ import {
   EFormTypes,
   TFormData,
   TFormFieldData,
+  TFormGenerator,
   TIntegerInputData,
   TSelectInputData,
   TTextInputData,
@@ -71,4 +72,33 @@ export function controlDigitIsValid(gln13: string) {
   const controlDigit = generateGln13CheckDigit(mainPart);
 
   return parseInt(lastDigit) === controlDigit;
+}
+
+export function iterateToRoot<T extends TFormData, F extends (...args: any[]) => [TFormFieldData, boolean]>(
+  fieldTransformationFn: F, formGenerator: TFormGenerator, id: string, formData: T
+): TFormData {
+  const [fieldTransformationResult, continueIteration] = fieldTransformationFn(formGenerator, id, formData);
+
+  const newFormData = {
+    ...formData,
+    [id]: fieldTransformationResult,
+  };
+
+  if (continueIteration) {
+    const parentId = getParentPath(id);
+
+    return parentId ? iterateToRoot(fieldTransformationFn, formGenerator, parentId, newFormData) : newFormData;
+  } else {
+    return newFormData;
+  }
+}
+
+export function getParentPath(id: string) {
+  const idAsArray = id.split('.').slice(0, -1);
+  return idAsArray.length ? idAsArray.join('.') : null;
+}
+
+export function getSwitcherPath(id: string) {
+  const idAsArray = id.split('.').slice(0, -2);
+  return idAsArray.length ? idAsArray.join('.') : null;
 }

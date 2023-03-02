@@ -1,8 +1,9 @@
-import { getFormRootId, isPrimitiveValueField } from './utils';
+import { getFormRootId, isPrimitiveValueField, iterateToRoot } from './utils';
 import {
   TFormData,
   TFormFieldData,
-  TFormGenerator, TIntegerInputData,
+  TFormGenerator,
+  TIntegerInputData,
   TSelectInputData,
   TTextInputData
 } from './types';
@@ -38,7 +39,7 @@ export function validateSelfAndParents(formGenerator: TFormGenerator, id: string
   return iterateToRoot(validateField, formGenerator, id, formData);
 }
 
-export function setSelfAndParentsTouched<T extends TFormData>(formGenerator: TFormGenerator, id: string, formData: T, ): T {
+export function setSelfAndParentsTouched(formGenerator: TFormGenerator, id: string, formData: TFormData, ): TFormData {
   return iterateToRoot(setFieldTouched, formGenerator, id, formData);
 }
 
@@ -115,34 +116,3 @@ function findErrorToShow<T extends TFormData>(_formGenerator: TFormGenerator, id
   ];
 }
 
-function iterateToRoot<T extends TFormData, F extends (...args: any[]) => [TFormFieldData, boolean]>(
-  ...args: [fieldTransformatonFn: F, fieldGenerator: TFormGenerator, id: string, formData: T]
-): any {
-
-  const [fieldTransformatonFn, formGenerator, id, formData] = args
-
-  const [fieldTransformationResult, continueIteration] = fieldTransformatonFn(formGenerator, id, formData);
-
-  const newFormData = {
-    ...formData,
-    [id]: fieldTransformationResult,
-  };
-
-  if (continueIteration) {
-    const parentId = getParentPath(id);
-
-    return parentId ? iterateToRoot(fieldTransformatonFn, formGenerator, parentId, newFormData) : newFormData;
-  } else {
-    return newFormData;
-  }
-}
-
-export function getParentPath(id: string) {
-  const idAsArray = id.split('.').slice(0, -1);
-  return idAsArray.length ? idAsArray.join('.') : null;
-}
-
-export function getSwitcherPath(id: string) {
-  const idAsArray = id.split('.').slice(0, -2);
-  return idAsArray.length ? idAsArray.join('.') : null;
-}

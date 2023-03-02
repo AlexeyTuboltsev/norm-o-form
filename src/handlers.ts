@@ -1,12 +1,11 @@
 import {
   deriveUiState,
   findFirstErrorToShow,
-  getSwitcherPath,
   setSelfAndParentsTouched,
   validateSelfAndParents,
 } from './core';
 import { EFormTypes, TFormData, TFormGenerator, TOneOfData } from './types';
-import { isPrimitiveValueField } from './utils';
+import { getSwitcherPath, isPrimitiveValueField } from './utils';
 
 function chooseOneOf(
   formGenerator: TFormGenerator,

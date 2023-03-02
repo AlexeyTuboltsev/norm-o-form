@@ -1,6 +1,6 @@
-import { controlDigitIsValid, generateGln13CheckDigit } from './utils';
+import { controlDigitIsValid, generateGln13CheckDigit } from '../src/utils';
 
-describe('gets a parent id from current id', () => {
+describe('validate gln13 control digit', () => {
   test('example 1', () => {
     const result = generateGln13CheckDigit('629104150021');
     expect(result).toEqual(3);
