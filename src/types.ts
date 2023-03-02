@@ -1,4 +1,4 @@
-export type TValidationFn = (id: string, data:TFormFieldData) => undefined | string
+export type TValidationFn = (id: string, data:TFormData) => undefined | string
 
 // export type TFormDataGeneratorFn<T extends TForm> =
 //   ({formId,validations,childrenFactories}:{formId: string,validations:TValidationFn,childrenFactories:TFormDataGeneratorFn<T>}) =>T
@@ -9,6 +9,7 @@ export type TValidationFn = (id: string, data:TFormFieldData) => undefined | str
 export type TGeneralFormData = {
   children: string[];
   id: string;
+  lookupPath:string;
   errors: string[];
   showError: boolean;
   touched: boolean;

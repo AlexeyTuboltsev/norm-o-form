@@ -6,7 +6,7 @@ import {
   maxLength,
   oneOf,
   select,
-  textInput,
+  textInput, TFormGenerator,
   TSelectInputData,
   TTextInputData
 } from "norm-o-form";
@@ -36,27 +36,27 @@ export const initialFormValues = {
   appVersion: '28',
   email: 'asdfasd@sdaf.xx',
   deviceId: '687943-848748',
-  type: EOneOfType.option2,
+  type: EOneOfType.option2 as const,
   zzz: 'zzz_value',
   xxx1: 'xxx1_val',
   xxx2: 'xsadf',
 };
 
 
-export function generateOneOfExampleFormData(
+export function oneOfExampleForm(
   rootFormId: string,
   initialValues: {
     appName: string;
     appVersion: string;
     email: string;
     deviceId: string;
-    type: EOneOfType;
+    type: EOneOfType.option2;
     zzz: string;
     xxx1: string;
     xxx2: string;
   },
 ) {
-  return formRoot<TFormDataToFormGenerator<TOneOfExampleForm>>({
+  return formRoot<TFormGenerator>({
     formId: rootFormId,
     validations: [] as any,
     childrenFactories: [
@@ -102,9 +102,9 @@ export function generateOneOfExampleFormData(
         isRequiredField: true,
       }),
       oneOf({
-        path: 'variants',
+        path: 'myVariants',
         switcherOptions: {
-          path: 'type',
+          path: 'switcher',
           value: initialValues.type,
           options: Object.values(EOneOfType).map((option) => ({ key: option, label: option })),
         },

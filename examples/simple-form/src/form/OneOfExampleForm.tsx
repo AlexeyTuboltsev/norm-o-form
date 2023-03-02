@@ -13,7 +13,7 @@ type TFormWrapperProps<T> = {
   formData: T;
 }
 
-const FormError = ({ fieldData, style }: { fieldData: TFormFieldData, style?:string }) => {
+const FormError = ({ fieldData, style }: { fieldData: TFormFieldData, style?: string }) => {
   const error = fieldData.errors[0]
   return error
     ? <div className={style}>{error}</div>
@@ -23,8 +23,9 @@ const FormError = ({ fieldData, style }: { fieldData: TFormFieldData, style?:str
 export const OneOfExampleForm: React.FunctionComponent<TFormWrapperProps<TOneOfExampleForm>> = ({
   formId,
   formData,
-}) =>
-  <FormWrapper
+}) => {
+
+  return <FormWrapper
     formId={formId}
   >
     {/*<FormError fieldData={formData["oneOfExampleForm"]} />*/}
@@ -45,22 +46,27 @@ export const OneOfExampleForm: React.FunctionComponent<TFormWrapperProps<TOneOfE
       label="deviceId"
     />
     <div className={styles.variantContainer}>
+
+
       <SelectInput
-        {...(formData as any)['oneOfExampleForm.variants.type']}
+        {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.switcher`]}
         label="variant"
       />
 
-      {(formData as any)['oneOfExampleForm.variants.type'].value === EOneOfType.option1 ? (
-        <TextInput {...(formData as any)['oneOfExampleForm.variants.zzz']} label="zzz" />
-      ) : (
-        <>
-          <TextInput {...(formData as any)['oneOfExampleForm.variants.xxx1']} label="xxx1" />
-          <TextInput {...(formData as any)['oneOfExampleForm.variants.xxx2']} label="xxx2" />
+      {(formData as any)['oneOfExampleForm.myVariants'].value === EOneOfType.option1
+        ? <TextInput {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.zzz`]}
+                   label="zzz" />
+        : <>
+          <TextInput {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.xxx1`]}
+                     label="xxx1" />
+          <TextInput {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.xxx2`]}
+                     label="xxx2" />
         </>
-      )}
+      }
     </div>
-  <div className={styles.buttonWrapper}>
-    <CancelFormButton />
-    <SubmitFormButton buttonState={formDataToButtonState(formData["oneOfExampleForm"])}/>
-  </div>
+    <div className={styles.buttonWrapper}>
+      <CancelFormButton />
+      <SubmitFormButton buttonState={formDataToButtonState(formData["oneOfExampleForm"])} />
+    </div>
   </FormWrapper>
+}

@@ -1,16 +1,7 @@
 import produce from "immer";
-import {
-  handleFormChange,
-  TFormData,
-  validateForm,
-  separateFormFunctionsAndData,
-  EFormTypes,
-  TValidationFn,
-  handleFormBlur
-} from "norm-o-form";
-import { generateOneOfExampleFormData, initialFormValues, TOneOfExampleForm } from "./formDataGenerator";
+import { deriveUiState, generateForm, handleFormBlur, handleFormChange, validateForm } from "norm-o-form";
+import { oneOfExampleForm, initialFormValues, TOneOfExampleForm } from "./formDataGenerator";
 import { GetReturnType } from "./utils";
-
 
 
 export type TFormReducer = {
@@ -46,22 +37,16 @@ export const formActions = {
   }),
 }
 
-type TFormValidator<T extends TFormData> = {[I in keyof T]:TValidationFn[]}
-
 export const ONE_OF_EXAMPLE_FORM_ROOT = 'oneOfExampleForm';
 
-
-let { validator, formData } = separateFormFunctionsAndData<TOneOfExampleForm>(
-  generateOneOfExampleFormData(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues)
-)
-
+const formGenerator = oneOfExampleForm(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues)
 
 export const formReducer = (state: TFormReducer = initialState, action: GetReturnType<typeof formActions>) => {
   return produce(state, draftState => {
+
     switch (action.type) {
       case EFormActionType.OPEN_FORM:
-        console.log(formData)
-        draftState.oneOfExampleForm = validateForm<TOneOfExampleForm>(validator,formData)
+        draftState.oneOfExampleForm = generateForm(formGenerator) as TOneOfExampleForm
         break;
       case EFormActionType.CLOSE_FORM:
         draftState.oneOfExampleForm = undefined
@@ -71,16 +56,12 @@ export const formReducer = (state: TFormReducer = initialState, action: GetRetur
           switch (action.payload.updateType) {
             case EFormUpdateType.CHANGE: {
               const formData = draftState.oneOfExampleForm
-              const { formData:newFormData, validator:newValidator } = handleFormChange(validator,formData, action.payload.fieldId, action.payload.value)
-              //todo
-              validator = newValidator
-              draftState.oneOfExampleForm = newFormData
+              draftState.oneOfExampleForm = handleFormChange(formGenerator, action.payload.fieldId,formData, action.payload.value) as TOneOfExampleForm
               break;
             }
             case EFormUpdateType.BLUR: {
               const formData = draftState.oneOfExampleForm
-              draftState.oneOfExampleForm = handleFormBlur(formData, action.payload.fieldId)
-
+              draftState.oneOfExampleForm = handleFormBlur(formGenerator, action.payload.fieldId,formData, ) as TOneOfExampleForm
               break;
             }
             default:

@@ -1,43 +1,26 @@
 import {
-  findFirstErrorToShow, separateFormFunctionsAndData,
+  deriveUiState,
+  findFirstErrorToShow,
+  getSwitcherPath,
   setSelfAndParentsTouched,
-  validateForm,
   validateSelfAndParents,
 } from './core';
-import { EFormTypes, TFormData, TFormValidator, TOneOfData, TSelectTagInputData } from './types';
+import { EFormTypes, TFormData, TFormGenerator, TOneOfData } from './types';
 import { isPrimitiveValueField } from './utils';
 
-function chooseOneOf<T extends TFormData>(
-  oldValidator: TFormValidator<T>,
-  oldFormData: T,
-  fieldData: TSelectTagInputData, value: string
-): { validator: TFormValidator<T>, formData: T } {
-  const oneOf = oldFormData[fieldData.parentPath] as TOneOfData;
+function chooseOneOf(
+  formGenerator: TFormGenerator,
+  fieldId: string,
+  formData: TFormData,
+  value: string
+): TFormData {
+  const switcherPath = getSwitcherPath(fieldId)
 
-  oneOf.children.forEach((childPath) => {
-    delete oldFormData[childPath];
-  });
-
-  oneOf.children = oneOf.variants[value].childrenPaths;
-  oneOf.value = value;
-
-  const { validator, formData } = separateFormFunctionsAndData(oneOf.variants[value].children)
-  const updatedValidator = {
-    ...oldValidator,
-    ...validator
-  }
-
-  const updatedFormData = {
-    ...oldFormData,
-    ...formData,
-  }
-
-  console.log("validator", validator, updatedValidator)
-  return {
-    validator: updatedValidator,
-    formData: validateForm(
-      updatedValidator as any, //TODO
-      updatedFormData)
+  if (!switcherPath) {
+    return formData
+  } else {
+    (formGenerator[switcherPath] as TOneOfData).value = value;
+    return deriveUiState(formGenerator)
   }
 }
 
@@ -96,32 +79,36 @@ function chooseOneOf<T extends TFormData>(
 //   return findFirstErrorToShow(setSelfAndParentsTouched(formDataValidated, arrayId), arrayId);
 // }
 
-export function handleFormChange<T extends TFormData>(validator: TFormValidator<T>, formData: T, id: string, value: any): { validator: TFormValidator<T>, formData: T } {
+export function handleFormChange(formGenerator: TFormGenerator, id: string, formData: TFormData, value: any): TFormData {
   const fieldData = formData[id];
-  if (fieldData.type === EFormTypes.SELECT_TAG) {
-    const { validator: newValidator, formData: newFormData } = chooseOneOf<T>(validator, formData, fieldData, value);
 
-    const validatedFormData = validateSelfAndParents<T>(validator, newFormData, id);
-    return {
-      validator: newValidator,
-      formData: setSelfAndParentsTouched<T>(validatedFormData, id)
-    }
+  if (fieldData.type === EFormTypes.SELECT_TAG) {
+
+    //todo first set touched and then validate
+    return setSelfAndParentsTouched(
+      formGenerator,
+      id,
+      validateSelfAndParents(
+        formGenerator,
+        id,
+        chooseOneOf(formGenerator, id, formData, value),
+      ),
+    )
 
   } else if (isPrimitiveValueField(fieldData)) {
     fieldData.value = value;
-    const validatedFormData = validateSelfAndParents(validator, formData, id);
-    return {
-      validator,
-      formData: setSelfAndParentsTouched(validatedFormData, id)
-    };
+
+    //todo first set touched and then validate
+    return setSelfAndParentsTouched(
+      formGenerator,
+      id,
+      validateSelfAndParents(formGenerator, id, formData),
+    )
   } else {
-    return {
-      validator,
-      formData
-    }
+    return formData
   }
 }
 
-export function handleFormBlur<T extends TFormData>(formData: T, id: string): T {
-  return findFirstErrorToShow(formData, id);
+export function handleFormBlur(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
+  return findFirstErrorToShow(formGenerator, id, formData);
 }

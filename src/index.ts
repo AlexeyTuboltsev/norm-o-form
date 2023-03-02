@@ -26,7 +26,8 @@ import {
 } from "./validators"
 import {
   validateForm,
-  separateFormFunctionsAndData
+  deriveUiState,
+  generateForm
 } from "./core"
 import {
   handleFormChange,
@@ -38,8 +39,9 @@ import {
 } from "./utils"
 
 export {
+  generateForm,
+  deriveUiState,
   validateForm,
-  separateFormFunctionsAndData,
   formRoot,
   array,
   validationGroup,

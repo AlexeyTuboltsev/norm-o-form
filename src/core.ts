@@ -1,49 +1,82 @@
 import { getFormRootId, isPrimitiveValueField } from './utils';
-import { TFormData, TFormDataToFormGenerator, TFormFieldData, TFormValidator, TValidatorAndFormData } from './types';
+import {
+  TFormData,
+  TFormFieldData,
+  TFormGenerator, TIntegerInputData,
+  TSelectInputData,
+  TTextInputData
+} from './types';
 
-export function validateForm<T extends TFormData>(validator: TFormValidator<T>, formData: T): T {
-  const formRootId = getFormRootId(formData);
-  return doValidateForm(validator, formRootId, formData);
+export function deriveUiState(formGenerator: TFormGenerator) {
+  return Object.keys(formGenerator).reduce((acc: TFormData, fieldId) => {
+    const field = { ...formGenerator[fieldId] }
+    delete (field as any).validations
+
+    if ((field as any).variants) {
+      delete (field as any).variants
+    }
+
+    acc[fieldId] = field
+    return acc
+  }, {})
 }
 
-export function validateSelfAndParents<T extends TFormData>(validator: TFormValidator<T>, data: T, id: string): T {
-  return iterateToRoot(validateField, id, data, validator,);
+export function generateForm(formGenerator: TFormGenerator):TFormData {
+  console.log("generateForm",formGenerator)
+  return validateForm(
+    formGenerator,
+    deriveUiState(formGenerator)
+  )
 }
 
-export function setSelfAndParentsTouched<T extends TFormData>(data: T, id: string): T {
-  return iterateToRoot(setFieldTouched, id, data);
+export function validateForm(formGenerator: TFormGenerator, formData: TFormData): TFormData {
+  const formRootId = getFormRootId(formGenerator);
+  return doValidateForm(formGenerator, formRootId, formData);
 }
 
-export function findFirstErrorToShow<T extends TFormData>(data: T, id: string): T {
-  return iterateToRoot(findErrorToShow, id, data);
+export function validateSelfAndParents(formGenerator: TFormGenerator, id: string, formData:TFormData): TFormData {
+  return iterateToRoot(validateField, formGenerator, id, formData);
+}
+
+export function setSelfAndParentsTouched<T extends TFormData>(formGenerator: TFormGenerator, id: string, formData: T, ): T {
+  return iterateToRoot(setFieldTouched, formGenerator, id, formData);
+}
+
+export function findFirstErrorToShow(formGenerator: TFormGenerator, id: string,formData: TFormData): TFormData {
+  return iterateToRoot(findErrorToShow, formGenerator, id, formData);
 }
 
 //*******//
 
-function doValidateForm<T extends TFormData>(validator: TFormValidator<T>, id: string, formData: T): T {
-
+function doValidateForm(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
   const newData = formData[id].children.reduce((acc, childId) => {
-    return doValidateForm(validator, childId, acc);
+    return doValidateForm(formGenerator, childId, acc);
   }, formData);
 
-  const [validatedField, _continueIteration] = validateField(id, newData, validator);
+  const [validatedField, _continueIteration] = validateField(formGenerator, id, newData);
   return {
     ...newData,
     [id]: validatedField,
   };
 }
 
-function validateField<T extends TFormData>(id: string, data: T, validator: TFormValidator<T>): [TFormFieldData, boolean] {
-  const fieldData = data[id];
+function fieldIsEmpty(fieldData: TTextInputData | TSelectInputData | TIntegerInputData) {
+  //todo add other primitive field types
+  return fieldData.value.trim() === ''
+}
+
+function validateField(formGenerator: TFormGenerator, id: string, formData: TFormData): [TFormFieldData, boolean] {
+
+  const fieldData = formData[id];
   let errors: any[] = [];
 
-  if (isPrimitiveValueField(fieldData) && !fieldData.isRequiredField && fieldData.value.trim() === '') {
+  if (isPrimitiveValueField(fieldData) && !fieldData.isRequiredField && fieldIsEmpty(fieldData)) {
     /*don't run validations on optional fields if they are empty*/
     errors = [];
   } else {
-    const validations = validator[id]
+    const validations = formGenerator[fieldData.lookupPath].validations
     for (const validationFn of validations) {
-      const validationResult = validationFn(id, data as any);
+      const validationResult = validationFn(id, formData);
       if (validationResult) {
         errors = [validationResult];
         break;
@@ -60,18 +93,18 @@ function validateField<T extends TFormData>(id: string, data: T, validator: TFor
   ];
 }
 
-function setFieldTouched<T extends TFormData>(id: string, data: T): [TFormFieldData, boolean] {
+function setFieldTouched<T extends TFormData>(_formGenerator: TFormGenerator, id: string, formData: T): [TFormFieldData, boolean] {
   return [
     {
-      ...data[id],
+      ...formData[id],
       touched: true,
     },
     true,
   ];
 }
 
-function findErrorToShow<T extends TFormData>(id: string, data: T): [TFormFieldData, boolean] {
-  const fieldData = data[id];
+function findErrorToShow<T extends TFormData>(_formGenerator: TFormGenerator, id: string, formData: T): [TFormFieldData, boolean] {
+  const fieldData = formData[id];
   const showError = Boolean(fieldData.errors.length) && fieldData.touched;
   return [
     {
@@ -83,24 +116,24 @@ function findErrorToShow<T extends TFormData>(id: string, data: T): [TFormFieldD
 }
 
 function iterateToRoot<T extends TFormData, F extends (...args: any[]) => [TFormFieldData, boolean]>(
-  ...args: [fieldTransformatonFn: F, id: string, data: T, ...rest: Omit<Parameters<F>,"id"|"data">]
+  ...args: [fieldTransformatonFn: F, fieldGenerator: TFormGenerator, id: string, formData: T]
 ): any {
 
-  const [fieldTransformatonFn, id, data, ...rest] = args
+  const [fieldTransformatonFn, formGenerator, id, formData] = args
 
-  const [fieldTransformationResult, continueIteration] = fieldTransformatonFn(id, data, ...rest);
+  const [fieldTransformationResult, continueIteration] = fieldTransformatonFn(formGenerator, id, formData);
 
-  const newData = {
-    ...data,
+  const newFormData = {
+    ...formData,
     [id]: fieldTransformationResult,
   };
 
   if (continueIteration) {
     const parentId = getParentPath(id);
 
-    return parentId ? iterateToRoot(fieldTransformatonFn, parentId, newData, ...rest) : newData;
+    return parentId ? iterateToRoot(fieldTransformatonFn, formGenerator, parentId, newFormData) : newFormData;
   } else {
-    return newData;
+    return newFormData;
   }
 }
 
@@ -109,17 +142,7 @@ export function getParentPath(id: string) {
   return idAsArray.length ? idAsArray.join('.') : null;
 }
 
-
-export function separateFormFunctionsAndData<T extends TFormData>(formGenerator: TFormDataToFormGenerator<T>): {validator: TFormValidator<T>, formData: T} {
-  return Object.keys(formGenerator).reduce((acc:TValidatorAndFormData<T>, id:keyof T) => {
-    acc.validator[id] = [...formGenerator[id].validations]
-
-    acc.formData[id] = { ...formGenerator[id] } as any
-    delete (acc.formData[id] as any).validations
-
-    return acc
-  },{
-    validator: {},
-    formData: {}
-  } as  TValidatorAndFormData<T>)
+export function getSwitcherPath(id: string) {
+  const idAsArray = id.split('.').slice(0, -2);
+  return idAsArray.length ? idAsArray.join('.') : null;
 }
