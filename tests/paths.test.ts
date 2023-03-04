@@ -1,4 +1,11 @@
-import { getFormRootId, getParentPath, getSwitcherPath, mapParentTree, removeSubtree } from "../src/utils";
+import {
+  getFormRootId,
+  getParentPath,
+  getSwitcherPath,
+  mapParentTree,
+  removeChildren,
+  removeSubtree
+} from "../src/utils";
 import { TFormData } from "../src";
 
 
@@ -284,11 +291,50 @@ describe("removeSubtree", () => {
       "root.b.c": { children: [] },
     }
     const resultingTree = {
-      "root": { children: ["root.a", "root.b"] },
+      "root": { children: ["root.a"] },
       "root.a": { children:["root.a.a"] },
       "root.a.a": { value: 2 },
     }
 
     expect(removeSubtree("root.b",tree as any)).toEqual(resultingTree)
+  })
+})
+
+describe("removeChildren", () => {
+
+  test("removes children", () => {
+    const tree = {
+      "root": { children: ["root.a", "root.b"] },
+      "root.a": { value: 'foo' },
+      "root.b": { children: ["root.b.a", "root.b.b", "root.b.c"] },
+      "root.b.a": { children: ["root.b.a.a"] },
+      "root.b.a.a": {value: 23},
+
+      "root.b.b": { value: 'bar' },
+      "root.b.c": { children: [] },
+    }
+    expect(removeChildren("root",tree as any)).toEqual({"root": { children: [] },})
+
+  })
+  test("leaves the rest of the tree in place", () => {
+    const tree = {
+      "root": { children: ["root.a", "root.b"] },
+      "root.a": { children:["root.a.a"] },
+      "root.a.a": { value: 2 },
+      "root.b": { children: ["root.b.a", "root.b.b", "root.b.c"] },
+      "root.b.a": { children: ["root.b.a.a"] },
+      "root.b.a.a": {value: 23},
+
+      "root.b.b": { value: 'bar' },
+      "root.b.c": { children: [] },
+    }
+    const resultingTree = {
+      "root": { children: ["root.a", "root.b"] },
+      "root.a": { children:["root.a.a"] },
+      "root.a.a": { value: 2 },
+      "root.b": { children: [] },
+    }
+
+    expect(removeChildren("root.b",tree as any)).toEqual(resultingTree)
   })
 })

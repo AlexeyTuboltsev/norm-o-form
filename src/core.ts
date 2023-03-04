@@ -48,7 +48,7 @@ export function findFirstErrorToShow(formGenerator: TFormGenerator, id: string, 
 //*******//
 
 function doValidateForm(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
-  console.log("doValidateForm", formGenerator, id, formData)
+
   const newData = formData[id].children.reduce((acc, childId) => {
     return doValidateForm(formGenerator, childId, acc);
   }, formData);

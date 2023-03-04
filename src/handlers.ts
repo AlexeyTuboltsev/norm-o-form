@@ -4,8 +4,8 @@ import {
   setSelfAndParentsTouched,
   validateSelfAndParents,
 } from './core';
-import { EFormTypes, TFormData, TFormGenerator, TOneOfData } from './types';
-import { getSwitcherPath, isPrimitiveValueField } from './utils';
+import { EFormTypes, TFormData, TFormGenerator } from './types';
+import { getParentPath, isPrimitiveValueField, removeChildren } from './utils';
 
 function chooseOneOf(
   formGenerator: TFormGenerator,
@@ -13,14 +13,25 @@ function chooseOneOf(
   formData: TFormData,
   value: string
 ): TFormData {
-  const switcherPath = getSwitcherPath(fieldId)
+  const subtreeRootId = getParentPath(fieldId)
+  console.log("subtreeRoot",subtreeRootId, "value",value)
 
-  if (!switcherPath) {
+  if (!subtreeRootId) {
     return formData
   } else {
+    const regenerateVariants = (formGenerator[subtreeRootId] as any).regenerateVariants(value)
 
-    (formGenerator[switcherPath] as TOneOfData).value = value;
-    return deriveUiState(formGenerator)
+    console.log("regenerateVariants",regenerateVariants);
+
+    const newFormGenerator = removeChildren(subtreeRootId, formGenerator as any);
+
+    newFormGenerator[subtreeRootId].children = regenerateVariants.childrenPaths
+
+    const rebuiltFormGenerator = Object.assign(
+      newFormGenerator,
+      regenerateVariants.children
+    )
+    return deriveUiState(rebuiltFormGenerator)
   }
 }
 

@@ -94,17 +94,33 @@ export function mapParentTree<T extends TFormData, F extends (...args: any[]) =>
 }
 
 export function removeSubtree(id: string, formData: TFormData): TFormData {
-  console.log(formData, id)
+
+  if (formData[id].children) {
+    formData[id].children.reduce((_acc, childId) => {
+      return removeSubtree(childId, formData)
+    }, formData)
+  }
+  delete formData[id]
+
+  const parentId = getParentPath(id)
+  if (parentId) {
+    formData[parentId].children = formData[parentId].children.filter(child => child !== id)
+  }
+
+  return formData
+}
+
+export function removeChildren(id: string, formData: TFormData): TFormData {
+
   if (formData[id].children) {
     formData[id].children.reduce((_acc, childId) => {
       return removeSubtree(childId, formData)
     }, formData)
   }
 
-  delete formData[id]
-
   return formData
 }
+
 //
 // export function rebuildSubtree<T extends TFormData>(formGenerator: TFormGenerator, id: string, formData: T): TFormData {
 //   const subtreeGenerator = formGenerator[id]
