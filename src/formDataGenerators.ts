@@ -1,34 +1,39 @@
-import { EFormTypes, TFormData, TTextInputData, TValidationFn } from './types';
+import { EFormTypes, TFormData, TValidationFn } from './types';
 import { childrenAreValid } from './validators';
 import { generateRandomString } from './utils';
 
 
-export function formRoot<T extends TFormData>({ formId, validations, childrenFactories }:
-  {formId: string,validations:TValidationFn,childrenFactories:Array<(parentId?: string)=>TFormData>}
-):T {
-  const { children, childrenPaths } = generateChildren(childrenFactories, formId);
+export function formRoot<T extends TFormData>({ formId, validations, children }:
+  { formId: string, validations: TValidationFn, children: Array<(parentId?: string) => TFormData> }
+): T {
+  const { children: childNodes, childrenPaths } = generateChildren(children, formId);
 
   return {
     [formId]: {
       id: formId,
       lookupPath: formId,
       type: EFormTypes.ROOT as const,
-      children: childrenPaths,
-      errors: [],
-      showError: false,
-      touched: false,
-      isRequiredField: true,
       validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
+      generate: () => ({
+        type: EFormTypes.ROOT as const,
+        id: formId,
+        lookupPath: formId,
+        touched: false,
+        showError: false,
+        errors: [],
+        isRequiredField: true,
+        children:childrenPaths
+      }),
     },
-    ...children,
+    ...childNodes,
   } as any;
 }
 
-export function array({ path, validations, memberFactory, value }:any) {
+export function array({ path, validations, memberFactory, value }: any) {
   return function (parentPath: string) {
     const arrayPath = generateFullPath(path, parentPath);
 
-    const res = value.map((memberInitialValue:any) => {
+    const res = value.map((memberInitialValue: any) => {
       const arrayMemberId = generateRandomString(4);
       const initMemberFactory = memberFactory(arrayMemberId, memberInitialValue);
       const arrayMemberRootPath = generateFullPath(arrayMemberId, arrayPath);
@@ -36,23 +41,20 @@ export function array({ path, validations, memberFactory, value }:any) {
       return { children, arrayMemberRootPath };
     });
 
-    const childrenCollected = res.reduce((acc:any, { children }:any) => {
+    const childrenCollected = res.reduce((acc: any, { children }: any) => {
       acc = { ...acc, ...children };
       return acc;
     }, {});
 
-    const arrayMemberRootPaths = res.reduce((acc:any, { arrayMemberRootPath }:any) => {
+    const arrayMemberRootPaths = res.reduce((acc: any, { arrayMemberRootPath }: any) => {
       acc = acc.concat(arrayMemberRootPath);
       return acc;
     }, []);
     return {
       [arrayPath]: {
         id: arrayPath,
-        lookupPath:arrayPath,
+        lookupPath: arrayPath,
         type: EFormTypes.ARRAY,
-        errors: [],
-        showError: false,
-        touched: false,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
         isRequiredField: true,
         children: arrayMemberRootPaths,
@@ -64,111 +66,94 @@ export function array({ path, validations, memberFactory, value }:any) {
 }
 
 export function validationGroup<T extends TFormData>({
-  path,
-  validations,
-  childrenFactories,
-}:any
+    path,
+    validations,
+    children,
+  }: any
 ): (parentPath?: any) => T {
   return function (parentPath?: any) {
     const fullPath = generateFullPath(path, parentPath);
-    const { children, childrenPaths } = generateChildren(childrenFactories, fullPath);
+    const { children: childrenNodes, childrenPaths } = generateChildren(children, fullPath);
 
     return {
       [fullPath]: {
         id: fullPath,
-        lookupPath:fullPath,
+        lookupPath: fullPath,
         type: EFormTypes.VALIDATION_GROUP as const,
-        children: childrenPaths,
-        errors: [],
-        showError: false,
-        isRequiredField: true,
-        touched: false,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
+        generate: () => ({
+          type: EFormTypes.VALIDATION_GROUP as const,
+          id: fullPath,
+          lookupPath: fullPath,
+          children: childrenPaths,
+          isRequiredField: true,
+          errors: [],
+          touched: false,
+          showError: false,
+        })
       },
-      ...children,
+      ...childrenNodes,
     };
   } as any;
 }
 
 export function oneOf({
   path,
+  initialValue,
   switcherOptions,
   variants,
-}: any) {
+}: { path: string, initialValue: string, switcherOptions: any, variants: { [key: string]: { children: any[] } } }) {
   return function (parentPath?: string) {
     const fullPath = generateFullPath(path, parentPath);
 
-    const variantFormData = Object.entries(variants).reduce((acc:any, [key, variant]:any):any => {
+    //include selectTag in each variant
+    const variantsWithSelector = Object.entries(variants).reduce((acc:any, [key, variant]) => {
+      acc[key] =  [
+        selectTag({
+            path: switcherOptions.path,
+            initialValue: key,
+            isRequiredField: true,
+            validations: [],
+            options: switcherOptions.options,
+          }
+        ),
+        ...variant.children
+      ]
+      return acc
+    }, {})
+    const regenerateVariants = (option:string) => generateChildren(variantsWithSelector[option], fullPath)
 
-      const childrenFormData = generateChildren([
-        validationGroup({
-          path: key,
-          validations: variant.validations,
-          childrenFactories: [
-            selectTag({
-              path: switcherOptions.path,
-              value: key,
-              isRequiredField: true,
-              validations: [],
-              options: switcherOptions.options,
-            }),
-            ...variant.children
-          ]
-        }),
-        // ...variant.children,
-      ], fullPath)
-
-      console.log("childrenFormData",childrenFormData)
-
-      acc.children = { ...acc.children, ...childrenFormData.children }
-      acc.childrenPaths = acc.childrenPaths.concat (childrenFormData.childrenPaths)
-
-      return acc;
-    }, {childrenPaths: [], children:{} });
-
-    console.log("variantFormData",variantFormData)
+    const {childrenPaths, children} = regenerateVariants(initialValue)
 
     return {
       [fullPath]: {
         id: fullPath,
         lookupPath: fullPath,
         type: EFormTypes.ONE_OF as const,
-        children: variantFormData.childrenPaths,
-        value: switcherOptions.value,
-        errors: [],
-        showError: false,
-        isRequiredField: true,
-        touched: false,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })],
+        regenerateVariants,
+        generate: () => ({
+          id: fullPath,
+          lookupPath: fullPath,
+          type: EFormTypes.ONE_OF as const,
+          touched: false,
+          showError: false,
+          errors: [],
+          isRequiredField: true,
+          children: childrenPaths,
+        }),
       },
-      ...variantFormData.children,
-    };
-  };
-}
-
-export function textField({ path, value }:{path:string, value: string}) {
-  return function (parentPath?: string) {
-    const fullPath = generateFullPath(path, parentPath);
-    return {
-      [fullPath]: {
-        type: EFormTypes.TEXT_FIELD as const,
-        id: fullPath,
-        lookupPath:fullPath,
-        children: [],
-        isRequiredField: true,
-        validations: [],
-        value,
-      },
+      ...children,
     };
   };
 }
 
 export function textInput({
   id,
-  value,
+  initialValue,
   isRequiredField,
   validations,
-}:{id: string,value: string, isRequiredField:boolean, validations: TValidationFn[]}):(parentId?: string) => {[fullPath:string]:TTextInputData} {
+}: { id: string, initialValue: string, isRequiredField: boolean, validations: TValidationFn[] }): (parentId?: string) => { [fullPath: string]:/*TTextInputData*/any } {
   return function (parentId) {
     const fullPath = generateFullPath(id, parentId);
     return {
@@ -176,13 +161,19 @@ export function textInput({
         type: EFormTypes.TEXT_INPUT as const,
         id: fullPath,
         lookupPath: fullPath,
-        errors: [],
-        showError: false,
-        touched: false,
-        value,
-        isRequiredField,
-        children: [],
+        initialValue,
         validations,
+        generate: ({ value }:{ value:string }) => ({
+          type: EFormTypes.TEXT_INPUT as const,
+          id: fullPath,
+          lookupPath: fullPath,
+          value,
+          isRequiredField,
+          touched: false,
+          showError: false,
+          errors: [],
+          children: []
+        }),
       },
     };
   };
@@ -190,14 +181,14 @@ export function textInput({
 
 export function numericInput({
   path,
-  value,
+  initialValue,
   isRequiredField,
   validations,
 }: {
   path: string;
-  value: string;
+  initialValue: string;
   isRequiredField: boolean;
-  validations: ((id: string, data:TFormData) => undefined | string)[];
+  validations: ((id: string, data: TFormData) => undefined | string)[];
 }) {
   return function (parentPath?: string) {
     const fullPath = generateFullPath(path, parentPath);
@@ -205,15 +196,20 @@ export function numericInput({
       [fullPath]: {
         type: EFormTypes.INTEGER_INPUT as const,
         id: fullPath,
-        lookupPath:fullPath,
-        children: [],
-        errors: [],
-        isMandatory: false,
-        showError: false,
-        touched: false,
-        isRequiredField,
-        value,
+        lookupPath: fullPath,
+        initialValue,
         validations,
+        generate: ({ value,}:{ value:string }) => ({
+          type: EFormTypes.INTEGER_INPUT as const,
+          id: fullPath,
+          lookupPath: fullPath,
+          value,
+          touched: false,
+          isRequiredField,
+          showError: false,
+          errors: [],
+          children: []
+        }),
       },
     };
   };
@@ -221,7 +217,7 @@ export function numericInput({
 
 export function select({
   path,
-  value,
+  initialValue,
   isRequiredField,
   options,
   validations,
@@ -232,15 +228,21 @@ export function select({
       [fullPath]: {
         type: EFormTypes.SELECT as const,
         id: fullPath,
-        lookupPath:fullPath,
-        errors: [],
-        showError: false,
-        touched: false,
-        value,
-        isRequiredField,
-        children: [],
-        options,
+        lookupPath: fullPath,
+        initialValue,
         validations,
+        generate: ({ value}:{ value:string }) => ({
+          type: EFormTypes.SELECT as const,
+          id: fullPath,
+          lookupPath: fullPath,
+          value,
+          isRequiredField,
+          touched: false,
+          showError: false,
+          errors: [],
+          options,
+          children: []
+        }),
       },
     };
   };
@@ -248,16 +250,16 @@ export function select({
 
 export function selectTag({
   path,
-  value,
   isRequiredField,
   options,
   validations,
+  initialValue
 }: {
   path: string;
-  value: string;
+  initialValue: string,
   isRequiredField: boolean;
   options: { key: string; label: string }[];
-  validations: ((id: string, data:TFormData) => undefined | string)[];
+  validations: ((id: string, data: TFormData) => undefined | string)[];
 }) {
   return function (parentPath?: string) {
     const fullPath = generateFullPath(path, parentPath);
@@ -265,28 +267,35 @@ export function selectTag({
       [fullPath]: {
         type: EFormTypes.SELECT_TAG as const,
         id: fullPath,
-        lookupPath:fullPath,
-        errors: [],
-        showError: false,
-        touched: false,
+        lookupPath: fullPath,
         parentPath,
-        value,
-        isRequiredField,
-        children: [],
-        options,
+        initialValue,
+        generate: ({ value}:{ value:string }) => ({
+          type: EFormTypes.SELECT_TAG as const,
+          id: fullPath,
+          value,
+          lookupPath: fullPath,
+          parentPath,
+          isRequiredField,
+          touched: false,
+          showError: false,
+          errors: [],
+          options,
+          children: []
+        }),
         validations,
       },
     };
   };
 }
 
-function generateFullPath(path: string, parentPath?: string): string {
+export function generateFullPath(path: string, parentPath?: string): string {
   return parentPath ? `${parentPath}.${path}` : path;
 }
 
-export function generateChildren<T extends TFormData>(childrenFactories:Array<(parentId?: string)=>T>, fullPath:string):{children: TFormData,childrenPaths: string[]} {
+export function generateChildren<T extends TFormData>(childrenFactories: Array<(parentId?: string) => T>, fullPath: string): { children: TFormData, childrenPaths: string[] } {
   return childrenFactories.reduce(
-    (acc:any, childFactory:any) => {
+    (acc: any, childFactory: any) => {
       const child = childFactory(fullPath);
       const childPath = Object.keys(child)[0];
       return {

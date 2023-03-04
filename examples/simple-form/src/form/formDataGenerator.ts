@@ -50,7 +50,7 @@ export function oneOfExampleForm(
     appVersion: string;
     email: string;
     deviceId: string;
-    type: EOneOfType.option2;
+    type: EOneOfType;
     zzz: string;
     xxx1: string;
     xxx2: string;
@@ -59,10 +59,10 @@ export function oneOfExampleForm(
   return formRoot<TFormGenerator>({
     formId: rootFormId,
     validations: [] as any,
-    childrenFactories: [
+    children: [
       textInput({
         id: 'deviceId',
-        value: initialValues.deviceId,
+        initialValue: initialValues.deviceId,
         validations: [
           isNotEmpty({ errorMessage: 'this value is mandatory' }),
           maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
@@ -71,7 +71,7 @@ export function oneOfExampleForm(
       }),
       textInput({
         id: 'email',
-        value: initialValues.email,
+        initialValue: initialValues.email,
         validations: [
           isNotEmpty({ errorMessage: 'this value is mandatory' }),
           isValidEmailAddress({ errorMessage: 'please provide a valid email' }),
@@ -81,7 +81,7 @@ export function oneOfExampleForm(
       }),
       textInput({
         id: 'appName',
-        value: initialValues.appName,
+        initialValue: initialValues.appName,
         validations: [
           isNotEmpty({ errorMessage: 'this value is mandatory' }),
           maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
@@ -90,7 +90,7 @@ export function oneOfExampleForm(
       }),
       select({
         path: 'appVersion',
-        value: initialValues.appVersion,
+        initialValue: initialValues.appVersion,
         options: [
           { key: 'appOne', label: 'appOne' },
           { key: 'appTwo', label: 'appTwo' },
@@ -103,36 +103,34 @@ export function oneOfExampleForm(
       }),
       oneOf({
         path: 'myVariants',
+        initialValue:initialValues.type,
         switcherOptions: {
           path: 'switcher',
-          value: initialValues.type,
           options: Object.values(EOneOfType).map((option) => ({ key: option, label: option })),
         },
         variants: {
           [EOneOfType.option1]: {
-            validations: [],
             children: [
               textInput({
                 id: 'zzz',
                 validations: [isGeoCoordinate({ errorMessage: 'this is not a geo coordinate' })],
-                value: initialValues.zzz || '',
+                initialValue: initialValues.zzz || '',
                 isRequiredField: false,
               }),
             ],
           },
           [EOneOfType.option2]: {
-            validations: [],
             children: [
               textInput({
                 id: 'xxx1',
                 validations: [isValidEmailAddress({ errorMessage: 'xxx1 does not contain a valid email' })],
-                value: initialValues.xxx1 || '',
+                initialValue: initialValues.xxx1 || '',
                 isRequiredField: true,
               }),
               textInput({
                 id: 'xxx2',
                 validations: [isValidEmailAddress({ errorMessage: 'xxx1 is not an email' })],
-                value: initialValues.xxx2 || '',
+                initialValue: initialValues.xxx2 || '',
                 isRequiredField: false,
               }),
             ],

@@ -1,4 +1,4 @@
-import { getFormRootId, getParentPath, getSwitcherPath, iterateToRoot } from "../src/utils";
+import { getFormRootId, getParentPath, getSwitcherPath, mapParentTree, removeSubtree } from "../src/utils";
 import { TFormData } from "../src";
 
 
@@ -198,7 +198,7 @@ describe("getSwitcherPath()", () => {
   })
 })
 
-describe.only("iterateToRoot()", () => {
+describe("iterateToRoot()", () => {
   const rootId = "rootId"
 
   const formGenerator = {
@@ -222,12 +222,15 @@ describe.only("iterateToRoot()", () => {
     [`${rootId}`]: { a: 17, value: NaN },
   }
 
-    const startingId = `${rootId}.a.b.c`
+  const startingId = `${rootId}.a.b.c`
 
   test("iterates from given id upwards to root and transforms each element", () => {
-    const fieldTransformationFn = jest.fn((formGenerator, id, formData) => [{...formData[id],value: formGenerator[id].value}, true])
+    const fieldTransformationFn = jest.fn((formGenerator, id, formData) => [{
+      ...formData[id],
+      value: formGenerator[id].value
+    }, true])
 
-    const result = iterateToRoot(fieldTransformationFn as any, formGenerator as any, startingId, formData as any)
+    const result = mapParentTree(fieldTransformationFn as any, formGenerator as any, startingId, formData as any)
     expect(result).toEqual(resultingFormData)
     expect(fieldTransformationFn).toHaveBeenCalledTimes(4)
   })
@@ -241,10 +244,51 @@ describe.only("iterateToRoot()", () => {
       [`${rootId}`]: { a: 17, value: 1 },
     }
 
-    const fieldTransformationFn = jest.fn((formGenerator, id, formData) => [{...formData[id],value: formGenerator[id].value}, formGenerator[id].value !== "388" ])
+    const fieldTransformationFn = jest.fn((formGenerator, id, formData) => [{
+      ...formData[id],
+      value: formGenerator[id].value
+    }, formGenerator[id].value !== "388"])
 
-    const result = iterateToRoot(fieldTransformationFn as any, formGenerator as any, startingId, formData as any)
+    const result = mapParentTree(fieldTransformationFn as any, formGenerator as any, startingId, formData as any)
     expect(result).toEqual(resultingFormData)
     expect(fieldTransformationFn).toHaveBeenCalledTimes(3)
+  })
+})
+
+describe("removeSubtree", () => {
+
+  test("removes subtree", () => {
+    const tree = {
+      "root": { children: ["root.a", "root.b"] },
+      "root.a": { value: 'foo' },
+      "root.b": { children: ["root.b.a", "root.b.b", "root.b.c"] },
+      "root.b.a": { children: ["root.b.a.a"] },
+      "root.b.a.a": {value: 23},
+
+      "root.b.b": { value: 'bar' },
+      "root.b.c": { children: [] },
+    }
+    expect(removeSubtree("root",tree as any)).toEqual({})
+
+  })
+  test("leaves the rest of the tree in place", () => {
+    const tree = {
+      "root": { children: ["root.a", "root.b"] },
+      "root.a": { children:["root.a.a"] },
+      "root.a.a": { value: 2 },
+      "root.b": { children: ["root.b.a", "root.b.b", "root.b.c"] },
+      "root.b.a": { children: ["root.b.a.a"] },
+      "root.b.a.a": {value: 23},
+
+      "root.b.b": { value: 'bar' },
+      "root.b.c": { children: [] },
+    }
+    const resultingTree = {
+      "root": { children: ["root.a", "root.b"] },
+      "root.a": { children:["root.a.a"] },
+      "root.a.a": { value: 2 },
+    }
+
+    expect(removeSubtree("root.b",tree as any)).toEqual(resultingTree)
   })
 })

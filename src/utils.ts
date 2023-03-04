@@ -9,7 +9,7 @@ import {
   TTextInputData,
 } from './types';
 
-export function formDataToButtonState<T extends TFormFieldData>(formData:T) {
+export function formDataToButtonState<T extends TFormFieldData>(formData: T) {
   return formData.errors.length ? EButtonState.DISABLED : EButtonState.ACTIVE;
 }
 
@@ -74,7 +74,7 @@ export function controlDigitIsValid(gln13: string) {
   return parseInt(lastDigit) === controlDigit;
 }
 
-export function iterateToRoot<T extends TFormData, F extends (...args: any[]) => [TFormFieldData, boolean]>(
+export function mapParentTree<T extends TFormData, F extends (...args: any[]) => [TFormFieldData, boolean]>(
   fieldTransformationFn: F, formGenerator: TFormGenerator, id: string, formData: T
 ): TFormData {
   const [fieldTransformationResult, continueIteration] = fieldTransformationFn(formGenerator, id, formData);
@@ -87,11 +87,34 @@ export function iterateToRoot<T extends TFormData, F extends (...args: any[]) =>
   if (continueIteration) {
     const parentId = getParentPath(id);
 
-    return parentId ? iterateToRoot(fieldTransformationFn, formGenerator, parentId, newFormData) : newFormData;
+    return parentId ? mapParentTree(fieldTransformationFn, formGenerator, parentId, newFormData) : newFormData;
   } else {
     return newFormData;
   }
 }
+
+export function removeSubtree(id: string, formData: TFormData): TFormData {
+  console.log(formData, id)
+  if (formData[id].children) {
+    formData[id].children.reduce((_acc, childId) => {
+      return removeSubtree(childId, formData)
+    }, formData)
+  }
+
+  delete formData[id]
+
+  return formData
+}
+//
+// export function rebuildSubtree<T extends TFormData>(formGenerator: TFormGenerator, id: string, formData: T): TFormData {
+//   const subtreeGenerator = formGenerator[id]
+//
+//   const newFormData = removeSubtree(id, formData)
+//
+
+//   return newFormData
+//
+// }
 
 export function getParentPath(id: string) {
   const idAsArray = id.split('.').slice(0, -1);

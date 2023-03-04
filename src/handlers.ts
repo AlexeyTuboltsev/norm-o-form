@@ -18,6 +18,7 @@ function chooseOneOf(
   if (!switcherPath) {
     return formData
   } else {
+
     (formGenerator[switcherPath] as TOneOfData).value = value;
     return deriveUiState(formGenerator)
   }

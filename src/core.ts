@@ -1,4 +1,4 @@
-import { getFormRootId, isPrimitiveValueField, iterateToRoot } from './utils';
+import { getFormRootId, isPrimitiveValueField, mapParentTree } from './utils';
 import {
   TFormData,
   TFormFieldData,
@@ -9,21 +9,19 @@ import {
 } from './types';
 
 export function deriveUiState(formGenerator: TFormGenerator) {
-  return Object.keys(formGenerator).reduce((acc: TFormData, fieldId) => {
-    const field = { ...formGenerator[fieldId] }
-    delete (field as any).validations
+  console.log("deriveUiState", formGenerator)
+  const x = Object.keys(formGenerator).reduce((acc: TFormData, fieldId) => {
+    const fieldGenerator = formGenerator[fieldId]
 
-    if ((field as any).variants) {
-      delete (field as any).variants
-    }
-
-    acc[fieldId] = field
+    acc[fieldId] = (fieldGenerator as any).generate({value: (fieldGenerator as any).initialValue })
     return acc
   }, {})
+  console.log("deriveUiState result:",x)
+  return x
 }
 
-export function generateForm(formGenerator: TFormGenerator):TFormData {
-  console.log("generateForm",formGenerator)
+export function generateForm(formGenerator: TFormGenerator): TFormData {
+  console.log("generateForm", formGenerator)
   return validateForm(
     formGenerator,
     deriveUiState(formGenerator)
@@ -35,21 +33,22 @@ export function validateForm(formGenerator: TFormGenerator, formData: TFormData)
   return doValidateForm(formGenerator, formRootId, formData);
 }
 
-export function validateSelfAndParents(formGenerator: TFormGenerator, id: string, formData:TFormData): TFormData {
-  return iterateToRoot(validateField, formGenerator, id, formData);
+export function validateSelfAndParents(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
+  return mapParentTree(validateField, formGenerator, id, formData);
 }
 
-export function setSelfAndParentsTouched(formGenerator: TFormGenerator, id: string, formData: TFormData, ): TFormData {
-  return iterateToRoot(setFieldTouched, formGenerator, id, formData);
+export function setSelfAndParentsTouched(formGenerator: TFormGenerator, id: string, formData: TFormData,): TFormData {
+  return mapParentTree(setFieldTouched, formGenerator, id, formData);
 }
 
-export function findFirstErrorToShow(formGenerator: TFormGenerator, id: string,formData: TFormData): TFormData {
-  return iterateToRoot(findErrorToShow, formGenerator, id, formData);
+export function findFirstErrorToShow(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
+  return mapParentTree(findErrorToShow, formGenerator, id, formData);
 }
 
 //*******//
 
 function doValidateForm(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
+  console.log("doValidateForm", formGenerator, id, formData)
   const newData = formData[id].children.reduce((acc, childId) => {
     return doValidateForm(formGenerator, childId, acc);
   }, formData);

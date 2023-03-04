@@ -10,7 +10,7 @@ In most popular front end form libraries validation seems to be an afterthought.
 The problem is that these libraries expect a static object to return a set of errors. In reality filling out a from should be a dynamic UX experience for the user, where the errors and different behaviours of the form are meant as aide for the user, guiding them through the process. Often different validations for onChange, onBlur and onPaste events are necessary, it should be possible to change/hide entire sections of the form (and respective validations) depending on user input, dynamic cross-field validations should not be a pain. For sure this can be done with usual validation tools too, but code for validation of any non-trivial form quickly becomes a huge mess of conditionals and imperative programming. The purpose of this library is to create a set of utilities that simplify coding of complex validations and UX behaviours.   
 
 
-## How should it work
+## How does it work
 We model a form as a tree-like structure where each ancestor is only valid if all children are valid. In addition, each ancestor can have an own validation function applied to itself and its children (E.g. an array validation can check if there are at least 5 but no more than 9 members of an array of inputs, but only after all array members are proved valid). Each validation starts by an event from the respective input and goes upwards through the ancestor hierarchy. This way we achieve a linear and predictable validation flow, at the same time allowing for cross-validations of any kind. We can also define different validations and input value transformations for different events.   
 
 the initial form definition function is for user's convenience.  
