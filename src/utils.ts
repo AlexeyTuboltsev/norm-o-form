@@ -103,6 +103,7 @@ export function removeSubtree(id: string, formData: TFormData): TFormData {
   delete formData[id]
 
   const parentId = getParentPath(id)
+
   if (parentId) {
     formData[parentId].children = formData[parentId].children.filter(child => child !== id)
   }
@@ -111,26 +112,11 @@ export function removeSubtree(id: string, formData: TFormData): TFormData {
 }
 
 export function removeChildren(id: string, formData: TFormData): TFormData {
+  return formData[id].children.reduce((_acc, childId) => {
+    return removeSubtree(childId, formData)
+  }, formData)
 
-  if (formData[id].children) {
-    formData[id].children.reduce((_acc, childId) => {
-      return removeSubtree(childId, formData)
-    }, formData)
-  }
-
-  return formData
 }
-
-//
-// export function rebuildSubtree<T extends TFormData>(formGenerator: TFormGenerator, id: string, formData: T): TFormData {
-//   const subtreeGenerator = formGenerator[id]
-//
-//   const newFormData = removeSubtree(id, formData)
-//
-
-//   return newFormData
-//
-// }
 
 export function getParentPath(id: string) {
   const idAsArray = id.split('.').slice(0, -1);

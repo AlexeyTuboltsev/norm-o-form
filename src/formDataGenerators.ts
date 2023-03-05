@@ -4,15 +4,16 @@ import { generateRandomString } from './utils';
 
 
 export function formRoot<T extends TFormData>({ formId, validations, children }:
-  { formId: string, validations: TValidationFn, children: Array<(parentId?: string) => TFormData> }
+  { formId: string, validations: TValidationFn, children: Array<(parentId: string) => TFormData> }
 ): T {
-  const { children: childNodes, childrenPaths } = generateChildren(children, formId);
+  const { children: childNodes, childrenPaths } = createChildrenGenerators(children, formId);
 
   return {
     [formId]: {
       id: formId,
       lookupPath: formId,
       type: EFormTypes.ROOT as const,
+      children: childrenPaths,
       validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
       generate: () => ({
         type: EFormTypes.ROOT as const,
@@ -22,13 +23,14 @@ export function formRoot<T extends TFormData>({ formId, validations, children }:
         showError: false,
         errors: [],
         isRequiredField: true,
-        children:childrenPaths
+        children: childrenPaths
       }),
     },
     ...childNodes,
   } as any;
 }
 
+//todo
 export function array({ path, validations, memberFactory, value }: any) {
   return function (parentPath: string) {
     const arrayPath = generateFullPath(path, parentPath);
@@ -37,7 +39,7 @@ export function array({ path, validations, memberFactory, value }: any) {
       const arrayMemberId = generateRandomString(4);
       const initMemberFactory = memberFactory(arrayMemberId, memberInitialValue);
       const arrayMemberRootPath = generateFullPath(arrayMemberId, arrayPath);
-      const { children } = generateChildren([initMemberFactory], arrayPath);
+      const { children } = createChildrenGenerators([initMemberFactory], arrayPath);
       return { children, arrayMemberRootPath };
     });
 
@@ -69,11 +71,11 @@ export function validationGroup<T extends TFormData>({
     path,
     validations,
     children,
-  }: any
-): (parentPath?: any) => T {
-  return function (parentPath?: any) {
+  }: { path: string, validations: TValidationFn[], children: Array<(parentId: string) => TFormData> }
+): (parentPath: string) => T {
+  return function (parentPath: string) {
     const fullPath = generateFullPath(path, parentPath);
-    const { children: childrenNodes, childrenPaths } = generateChildren(children, fullPath);
+    const { children: childrenNodes, childrenPaths } = createChildrenGenerators(children, fullPath);
 
     return {
       [fullPath]: {
@@ -81,6 +83,7 @@ export function validationGroup<T extends TFormData>({
         lookupPath: fullPath,
         type: EFormTypes.VALIDATION_GROUP as const,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
+        children: childrenPaths,
         generate: () => ({
           type: EFormTypes.VALIDATION_GROUP as const,
           id: fullPath,
@@ -103,48 +106,52 @@ export function oneOf({
   switcherOptions,
   variants,
 }: { path: string, initialValue: string, switcherOptions: any, variants: { [key: string]: { children: any[] } } }) {
-  return function (parentPath?: string) {
+  return function (parentPath: string) {
     const fullPath = generateFullPath(path, parentPath);
 
-    //include selectTag in each variant
-    const variantsWithSelector = Object.entries(variants).reduce((acc:any, [key, variant]) => {
-      acc[key] =  [
-        selectTag({
-            path: switcherOptions.path,
-            initialValue: key,
-            isRequiredField: true,
-            validations: [],
-            options: switcherOptions.options,
-          }
-        ),
-        ...variant.children
-      ]
+    const wrapVariantInValidationGroup = (key: string, variant: any) => validationGroup({
+      path: key,
+      validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })],
+      children: variant.children
+    })
+
+    const { childrenPaths, children } = createChildrenGenerators(
+      Object.entries(variants)
+        .map(([key, variant]) => wrapVariantInValidationGroup(key, variant)) as any,
+      fullPath
+    )
+
+    const variantChildrenPaths = Object.entries(variants).reduce((acc: any, [key, variant]) => {
+      const variantChildren = [wrapVariantInValidationGroup(key, variant)]
+      acc[key] = createChildrenGenerators(variantChildren as any, fullPath).childrenPaths
       return acc
     }, {})
-    const regenerateVariants = (option:string) => generateChildren(variantsWithSelector[option], fullPath)
-
-    const {childrenPaths, children} = regenerateVariants(initialValue)
 
     return {
       [fullPath]: {
+        type: EFormTypes.SELECT_TAG as const,
         id: fullPath,
         lookupPath: fullPath,
-        type: EFormTypes.ONE_OF as const,
+        parentPath,
+        initialValue,
+        children: childrenPaths,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })],
-        regenerateVariants,
-        generate: () => ({
+        generate: ({ value }: { value: string }) => ({
+          type: EFormTypes.SELECT_TAG as const,
           id: fullPath,
+          value,
           lookupPath: fullPath,
-          type: EFormTypes.ONE_OF as const,
+          parentPath,
+          isRequiredField: true,
           touched: false,
           showError: false,
           errors: [],
-          isRequiredField: true,
-          children: childrenPaths,
+          options: switcherOptions.options,
+          children: variantChildrenPaths[value]
         }),
       },
-      ...children,
-    };
+      ...children
+    }
   };
 }
 
@@ -163,7 +170,8 @@ export function textInput({
         lookupPath: fullPath,
         initialValue,
         validations,
-        generate: ({ value }:{ value:string }) => ({
+        children: [],
+        generate: ({ value }: { value: string }) => ({
           type: EFormTypes.TEXT_INPUT as const,
           id: fullPath,
           lookupPath: fullPath,
@@ -199,7 +207,8 @@ export function numericInput({
         lookupPath: fullPath,
         initialValue,
         validations,
-        generate: ({ value,}:{ value:string }) => ({
+        children: [],
+        generate: ({ value, }: { value: string }) => ({
           type: EFormTypes.INTEGER_INPUT as const,
           id: fullPath,
           lookupPath: fullPath,
@@ -231,7 +240,8 @@ export function select({
         lookupPath: fullPath,
         initialValue,
         validations,
-        generate: ({ value}:{ value:string }) => ({
+        children: [],
+        generate: ({ value }: { value: string }) => ({
           type: EFormTypes.SELECT as const,
           id: fullPath,
           lookupPath: fullPath,
@@ -250,14 +260,13 @@ export function select({
 
 export function selectTag({
   path,
-  isRequiredField,
   options,
-  validations,
+  children,
   initialValue
 }: {
   path: string;
   initialValue: string,
-  isRequiredField: boolean;
+  children: Array<(parentId?: string) => TFormData>,
   options: { key: string; label: string }[];
   validations: ((id: string, data: TFormData) => undefined | string)[];
 }) {
@@ -270,20 +279,21 @@ export function selectTag({
         lookupPath: fullPath,
         parentPath,
         initialValue,
-        generate: ({ value}:{ value:string }) => ({
+        children: children,
+        validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })],
+        generate: ({ value }: { value: string }) => ({
           type: EFormTypes.SELECT_TAG as const,
           id: fullPath,
           value,
           lookupPath: fullPath,
           parentPath,
-          isRequiredField,
+          isRequiredField: true,
           touched: false,
           showError: false,
           errors: [],
           options,
-          children: []
+          children
         }),
-        validations,
       },
     };
   };
@@ -293,7 +303,7 @@ export function generateFullPath(path: string, parentPath?: string): string {
   return parentPath ? `${parentPath}.${path}` : path;
 }
 
-export function generateChildren<T extends TFormData>(childrenFactories: Array<(parentId?: string) => T>, fullPath: string): { children: TFormData, childrenPaths: string[] } {
+export function createChildrenGenerators<T extends TFormData>(childrenFactories: Array<(parentId: string) => T>, fullPath: string): { children: TFormData, childrenPaths: string[] } {
   return childrenFactories.reduce(
     (acc: any, childFactory: any) => {
       const child = childFactory(fullPath);
@@ -309,3 +319,4 @@ export function generateChildren<T extends TFormData>(childrenFactories: Array<(
     { children: {}, childrenPaths: [] },
   ) as any
 }
+

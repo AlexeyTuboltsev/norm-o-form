@@ -48,6 +48,7 @@ export function childrenAreValid(options: { errorMessage: string }) {
     let childHasError = false;
 
     for (const childId of data[id].children) {
+
       if (data[childId].errors.length !== 0) {
         childHasError = true;
         break;

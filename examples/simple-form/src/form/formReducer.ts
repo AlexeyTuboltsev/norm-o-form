@@ -41,9 +41,7 @@ export const ONE_OF_EXAMPLE_FORM_ROOT = 'oneOfExampleForm';
 
 const formGenerator = oneOfExampleForm(ONE_OF_EXAMPLE_FORM_ROOT, initialFormValues)
 
-export const formReducer = (state: TFormReducer = initialState, action: GetReturnType<typeof formActions>) => {
-  return produce(state, draftState => {
-
+export const formReducer = produce((draftState: TFormReducer = initialState, action: GetReturnType<typeof formActions>) => {
     switch (action.type) {
       case EFormActionType.OPEN_FORM:
         draftState.oneOfExampleForm = generateForm(formGenerator) as TOneOfExampleForm
@@ -56,7 +54,7 @@ export const formReducer = (state: TFormReducer = initialState, action: GetRetur
           switch (action.payload.updateType) {
             case EFormUpdateType.CHANGE: {
               const formData = draftState.oneOfExampleForm
-              draftState.oneOfExampleForm = handleFormChange(formGenerator, action.payload.fieldId,formData, action.payload.value) as TOneOfExampleForm
+              draftState.oneOfExampleForm =handleFormChange(formGenerator, action.payload.fieldId,formData, action.payload.value) as TOneOfExampleForm
               break;
             }
             case EFormUpdateType.BLUR: {
@@ -68,10 +66,13 @@ export const formReducer = (state: TFormReducer = initialState, action: GetRetur
               break;
           }
         }
+        break;
       }
+      default:
+        return draftState
     }
-  })
-}
+
+})
 
 
 export const selectFormState = (state: any): TFormReducer => state.form

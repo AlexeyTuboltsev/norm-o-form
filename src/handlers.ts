@@ -5,7 +5,7 @@ import {
   validateSelfAndParents,
 } from './core';
 import { EFormTypes, TFormData, TFormGenerator } from './types';
-import { getParentPath, isPrimitiveValueField, removeChildren } from './utils';
+import { isPrimitiveValueField, removeSubtree } from './utils';
 
 function chooseOneOf(
   formGenerator: TFormGenerator,
@@ -13,103 +13,28 @@ function chooseOneOf(
   formData: TFormData,
   value: string
 ): TFormData {
-  const subtreeRootId = getParentPath(fieldId)
-  console.log("subtreeRoot",subtreeRootId, "value",value)
+  const formDataWithoutVariantSubtree = removeSubtree(fieldId, formData);
 
-  if (!subtreeRootId) {
-    return formData
-  } else {
-    const regenerateVariants = (formGenerator[subtreeRootId] as any).regenerateVariants(value)
-
-    console.log("regenerateVariants",regenerateVariants);
-
-    const newFormGenerator = removeChildren(subtreeRootId, formGenerator as any);
-
-    newFormGenerator[subtreeRootId].children = regenerateVariants.childrenPaths
-
-    const rebuiltFormGenerator = Object.assign(
-      newFormGenerator,
-      regenerateVariants.children
-    )
-    return deriveUiState(rebuiltFormGenerator)
-  }
+  return deriveUiState(
+    formGenerator,
+    formDataWithoutVariantSubtree,
+    fieldId,
+    value
+  )
 }
 
-// export function addArrayMember(arrayId: string, place: number, intialValue, formData) {
-//   const arrayData = formData[arrayId];
-//   const newMemberId = generateRandomString(4);
-//   const initMemberFactory = arrayData.initMembers(newMemberId, intialValue);
-//
-//   const { childrenPaths, children } = generateChildren([initMemberFactory], arrayId);
-//
-//   formData[arrayId].children.splice(place, 0, childrenPaths[0]);
-//
-//   const newFormData = {
-//     ...formData,
-//     ...children,
-//   };
-//
-//   const formDataValidated = validateForm(newFormData);
-
-//   return findFirstErrorToShow(setSelfAndParentsTouched(formDataValidated, arrayId), arrayId);
-// }
-
-// export function moveArrayMemberUp(arrayMemberId: string, formData) {
-//   const arrayId = getParentPath(arrayMemberId);
-//   const place = formData[arrayId].children.findIndex((childId) => childId === arrayMemberId);
-//   const newPlace = place - 1 >= 0 ? place - 1 : 0;
-//
-//   return moveArrayMember(arrayMemberId, formData, arrayId, place, newPlace);
-// }
-
-// export function moveArrayMemberDown(arrayMemberId: string, formData) {
-//   const arrayId = getParentPath(arrayMemberId);
-//   const place = formData[arrayId].children.findIndex((childId) => childId === arrayMemberId);
-//   const newPlace = place + 1 <= formData[arrayId].children.length ? place + 1 : formData[arrayId].children.length;
-//
-//   return moveArrayMember(arrayMemberId, formData, arrayId, place, newPlace);
-// }
-
-// export function moveArrayMember(arrayMemberId: string, formData, arrayId: string, place: number, newPlace: number) {
-//   formData[arrayId].children.splice(place, 1);
-//   formData[arrayId].children.splice(newPlace, 0, arrayMemberId);
-//
-//   const formDataValidated = validateSelfAndParents(formData, arrayId);
-//   return findFirstErrorToShow(setSelfAndParentsTouched(formDataValidated, arrayId), arrayId);
-// }
-//
-// export function removeArrayMember(arrayMemberId, formData) {
-//   const arrayId = getParentPath(arrayMemberId);
-//
-//   formData[arrayId].children = formData[arrayId].children.filter((childId) => childId !== arrayMemberId);
-//
-//   formData[arrayMemberId].children.forEach((childId) => delete formData[childId]);
-//   delete formData[arrayMemberId];
-//
-//   const formDataValidated = validateSelfAndParents(formData, arrayId);
-//   return findFirstErrorToShow(setSelfAndParentsTouched(formDataValidated, arrayId), arrayId);
-// }
 
 export function handleFormChange(formGenerator: TFormGenerator, id: string, formData: TFormData, value: any): TFormData {
+
   const fieldData = formData[id];
-
   if (fieldData.type === EFormTypes.SELECT_TAG) {
-
-    //todo first set touched and then validate
-    return setSelfAndParentsTouched(
-      formGenerator,
-      id,
-      validateSelfAndParents(
-        formGenerator,
-        id,
-        chooseOneOf(formGenerator, id, formData, value),
-      ),
-    )
+    const updatedFormData = chooseOneOf(formGenerator, id, formData, value) as any
+    const validatedFormData = validateSelfAndParents(formGenerator, id, updatedFormData)
+    return setSelfAndParentsTouched(formGenerator, id, validatedFormData)
 
   } else if (isPrimitiveValueField(fieldData)) {
     fieldData.value = value;
 
-    //todo first set touched and then validate
     return setSelfAndParentsTouched(
       formGenerator,
       id,

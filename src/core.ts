@@ -8,23 +8,22 @@ import {
   TTextInputData
 } from './types';
 
-export function deriveUiState(formGenerator: TFormGenerator) {
-  console.log("deriveUiState", formGenerator)
-  const x = Object.keys(formGenerator).reduce((acc: TFormData, fieldId) => {
-    const fieldGenerator = formGenerator[fieldId]
+export function deriveUiState(formGenerator: TFormGenerator, initialFormData:TFormData,fieldId:string, value:any):TFormData {
+  const fieldGenerator = formGenerator[fieldId] as any
 
-    acc[fieldId] = (fieldGenerator as any).generate({value: (fieldGenerator as any).initialValue })
-    return acc
-  }, {})
-  console.log("deriveUiState result:",x)
-  return x
+  initialFormData[fieldId] = fieldGenerator.generate({value })
+
+
+  return initialFormData[fieldId].children.reduce((_acc:any, childId:string)=>{
+    return deriveUiState(formGenerator, initialFormData, childId, (formGenerator[childId] as any).initialValue)
+  }, initialFormData)
 }
 
 export function generateForm(formGenerator: TFormGenerator): TFormData {
-  console.log("generateForm", formGenerator)
+  const rootId = getFormRootId(formGenerator)
   return validateForm(
     formGenerator,
-    deriveUiState(formGenerator)
+    deriveUiState(formGenerator,{},rootId, undefined)
   )
 }
 

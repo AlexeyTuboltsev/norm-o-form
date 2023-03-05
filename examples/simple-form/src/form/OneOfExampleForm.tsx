@@ -47,16 +47,16 @@ export const OneOfExampleForm: React.FunctionComponent<TFormWrapperProps<TOneOfE
     />
     <div className={styles.variantContainer}>
       <SelectInput
-        {...(formData as any)['oneOfExampleForm.myVariants.switcher']}
+        {...(formData as any)['oneOfExampleForm.myVariants']}
         label="variant"
       />
 
-      {(formData as any)['oneOfExampleForm.myVariants.switcher'].value === EOneOfType.option1 ? (
-        <TextInput {...(formData as any)['oneOfExampleForm.myVariants.zzz']} label="zzz" />
+      {(formData as any)['oneOfExampleForm.myVariants'].value === EOneOfType.option1 ? (
+        <TextInput {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.zzz`]} label="zzz" />
       ) : (
         <>
-          <TextInput {...(formData as any)['oneOfExampleForm.myVariants.xxx1']} label="xxx1" />
-          <TextInput {...(formData as any)['oneOfExampleForm.myVariants.xxx2']} label="xxx2" />
+          <TextInput {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.xxx1`]} label="xxx1" />
+          <TextInput {...(formData as any)[`oneOfExampleForm.myVariants.${(formData as any)['oneOfExampleForm.myVariants'].value}.xxx2`]} label="xxx2" />
         </>
       )}
     </div>
