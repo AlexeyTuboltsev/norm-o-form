@@ -6,12 +6,11 @@ import {
   textInput,
   numericInput,
   select,
-  selectTag,
 } from "./formDataGenerators";
 import {
   TFormData,
-  TSelectInputData,
-  TTextInputData,
+  TSelectFieldData,
+  TTextFieldData,
   TFormGenerator,
   TFormValidator,
   EFormTypes,
@@ -48,7 +47,6 @@ export {
   textInput,
   numericInput,
   select,
-  selectTag,
 
   handleFormBlur,
   handleFormChange,
@@ -63,8 +61,8 @@ export {
 
   type TFormData,
   type TFormGenerator,
-  type TSelectInputData,
-  type TTextInputData,
+  type TSelectFieldData,
+  type TTextFieldData,
   type TFormValidator,
   type EFormTypes,
   type TValidationFn

@@ -4,9 +4,9 @@ import {
   TFormData,
   TFormFieldData,
   TFormGenerator,
-  TIntegerInputData,
-  TSelectInputData,
-  TTextInputData,
+  TNumericFieldData,
+  TSelectFieldData,
+  TTextFieldData,
 } from './types';
 
 export function formDataToButtonState<T extends TFormFieldData>(formData: T) {
@@ -24,7 +24,7 @@ export function getFormRoot<T extends TFormFieldData>(formData: TFormData): T {
   return rootField as T; // TODO, root is guaranteed to be there, fix typings.
 }
 
-export function getFormRootId<T extends TFormData>(formData: T): string {
+export function getFormRootId(formData: TFormGenerator): string {
   let rootFieldId;
   for (const formFieldId in formData) {
     if (formData[formFieldId].type === EFormTypes.ROOT) {
@@ -37,7 +37,7 @@ export function getFormRootId<T extends TFormData>(formData: T): string {
 
 export function isPrimitiveValueField(
   fieldData: TFormFieldData,
-): fieldData is TTextInputData | TSelectInputData | TIntegerInputData {
+): fieldData is TTextFieldData | TSelectFieldData | TNumericFieldData {
   return (
     fieldData.type === EFormTypes.TEXT_INPUT ||
     fieldData.type === EFormTypes.SELECT ||
@@ -118,6 +118,10 @@ export function removeChildren(id: string, formData: TFormData): TFormData {
 
 }
 
+export function generateFullPath(path: string, parentPath?: string): string {
+  return parentPath ? `${parentPath}.${path}` : path;
+}
+
 export function getParentPath(id: string) {
   const idAsArray = id.split('.').slice(0, -1);
   return idAsArray.length ? idAsArray.join('.') : null;
@@ -127,3 +131,22 @@ export function getSwitcherPath(id: string) {
   const idAsArray = id.split('.').slice(0, -2);
   return idAsArray.length ? idAsArray.join('.') : null;
 }
+
+
+export function createChildrenGenerators<T extends TFormGenerator>(childrenFactories: Array<(parentId: string) => T>, fullPath: string): { children: TFormGenerator, childrenPaths: string[] } {
+  return childrenFactories.reduce(
+    (acc: any, childFactory: any) => {
+      const child = childFactory(fullPath);
+      const childPath = Object.keys(child)[0];
+      return {
+        children: {
+          ...acc.children,
+          ...child,
+        },
+        childrenPaths: [...acc.childrenPaths, childPath],
+      };
+    },
+    { children: {}, childrenPaths: [] },
+  ) as any
+}
+

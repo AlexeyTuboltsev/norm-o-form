@@ -6,11 +6,11 @@ import {
   maxLength,
   oneOf,
   select,
-  textInput, TFormGenerator,
-  TSelectInputData,
-  TTextInputData
+  textInput, TSelectFieldData,
+  TTextFieldData,
+
 } from "norm-o-form";
-import { TFormDataToFormGenerator, TRootFormData } from "norm-o-form/types";
+import { TRootFormData } from "norm-o-form/types";
 
 
 export enum EOneOfType {
@@ -20,11 +20,11 @@ export enum EOneOfType {
 
 export type TOneOfExampleForm = {
   'oneOfExampleForm':TRootFormData;
-  'oneOfExampleForm.appName': TTextInputData;
-  'oneOfExampleForm.appVersion': TSelectInputData;
-  'oneOfExampleForm.email': TTextInputData;
-  'oneOfExampleForm.deviceId': TTextInputData;
-  'oneOfExampleForm.type': TTextInputData;
+  'oneOfExampleForm.appName': TTextFieldData;
+  'oneOfExampleForm.appVersion': TSelectFieldData;
+  'oneOfExampleForm.email': TTextFieldData;
+  'oneOfExampleForm.deviceId': TTextFieldData;
+  'oneOfExampleForm.type': TTextFieldData;
   // 'oneOfExampleForm.variants'
   // 'oneOfExampleForm.variants.type': TTextInputData;
   // 'oneOfExampleForm.variants.xxx1': TTextInputData;
@@ -56,7 +56,7 @@ export function oneOfExampleForm(
     xxx2: string;
   },
 ) {
-  return formRoot<TFormGenerator>({
+  return formRoot({
     formId: rootFormId,
     validations: [] as any,
     children: [

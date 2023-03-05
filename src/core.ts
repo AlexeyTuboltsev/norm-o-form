@@ -2,10 +2,9 @@ import { getFormRootId, isPrimitiveValueField, mapParentTree } from './utils';
 import {
   TFormData,
   TFormFieldData,
-  TFormGenerator,
-  TIntegerInputData,
-  TSelectInputData,
-  TTextInputData
+  TFormGenerator, TNumericFieldData,
+  TSelectFieldData,
+  TTextFieldData
 } from './types';
 
 export function deriveUiState(formGenerator: TFormGenerator, initialFormData:TFormData,fieldId:string, value:any):TFormData {
@@ -59,7 +58,7 @@ function doValidateForm(formGenerator: TFormGenerator, id: string, formData: TFo
   };
 }
 
-function fieldIsEmpty(fieldData: TTextInputData | TSelectInputData | TIntegerInputData) {
+function fieldIsEmpty(fieldData: TTextFieldData | TSelectFieldData | TNumericFieldData) {
   //todo add other primitive field types
   return fieldData.value.trim() === ''
 }
