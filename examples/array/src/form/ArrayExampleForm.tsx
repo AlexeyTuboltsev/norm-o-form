@@ -3,8 +3,8 @@ import { TextInput } from "./components/TextInput";
 import React from "react";
 import { SelectInput } from "./components/SelectInput";
 import styles from "./ArrayExampleForm.module.scss"
-import { TArrayExampleForm } from "./formDataGenerator";
-import { TArrayMemberData, TFormFieldData } from "norm-o-form/types";
+import { EOneOfType, TArrayExampleForm } from "./formDataGenerator";
+import { TFormFieldData } from "norm-o-form/types";
 import { CancelFormButton, SubmitFormButton } from "./components/Button";
 import { formDataToButtonState, TTextFieldData } from "norm-o-form";
 
@@ -51,7 +51,21 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
       )
       }
     </>
+    <div className={styles.variantContainer}>
+      <SelectInput
+        {...(formData as any)['arrayExampleForm.myVariants']}
+        label="variant"
+      />
 
+      {(formData as any)['arrayExampleForm.myVariants'].value === EOneOfType.option1 ? (
+        <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.zzz`]} label="zzz" />
+      ) : (
+        <>
+          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.xxx1`]} label="xxx1" />
+          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.xxx2`]} label="xxx2" />
+        </>
+      )}
+    </div>
     <div className={styles.buttonWrapper}>
       <CancelFormButton />
       <SubmitFormButton buttonState={formDataToButtonState(formData["arrayExampleForm"])} />
