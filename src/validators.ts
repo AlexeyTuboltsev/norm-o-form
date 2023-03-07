@@ -1,4 +1,4 @@
-import { controlDigitIsValid } from './utils';
+import { controlDigitIsValid, isPrimitiveValueField } from './utils';
 import { TFormData } from "./types";
 
 export function isNumber(options: { errorMessage: string }) {
@@ -58,6 +58,30 @@ export function childrenAreValid(options: { errorMessage: string }) {
     return childHasError ? options.errorMessage : undefined;
   };
 }
+
+//todo now works only for primitive fields
+export function eitherAllOrNone(options: { errorMessage: string}){
+  return function (id:string, data: TFormData){
+
+    let childHasError = false;
+    let childIsEmpty = false;
+    let childIsValid = false;
+
+    for (const childId of data[id].children) {
+      const fieldData = data[childId]
+      if (fieldData.errors.length !== 0) {
+        childHasError = true;
+        break;
+      } else if(isPrimitiveValueField(fieldData) && fieldData.value !== "" && fieldData.errors.length !== 0){
+        childIsValid = true
+      } else if(isPrimitiveValueField(fieldData) && fieldData.value === "") {
+        childIsEmpty = true
+      }
+    }
+    return childHasError || (childIsEmpty !== childIsValid) ? options.errorMessage : undefined;
+  };
+}
+
 
 export function isLessThan(options: { errorMessage: string; lessThan: number }) {
   return function (id:string, data:TFormData) {

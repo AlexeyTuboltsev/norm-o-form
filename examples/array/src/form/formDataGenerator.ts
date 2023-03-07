@@ -10,6 +10,7 @@ import {
   TTextFieldData
 } from "norm-o-form";
 import { TArrayData, TRootFormData } from "norm-o-form/types";
+import { eitherAllOrNone, minLength } from "norm-o-form/validators";
 
 export enum EOneOfType {
   option1 = 'option1',
@@ -37,7 +38,6 @@ export const initialFormValues = {
     { name: "Bjork", album: "Delicious Demon" }
   ]
 };
-
 
 export function arrayExampleForm(
   rootFormId: string,
@@ -108,23 +108,23 @@ export function arrayExampleForm(
         getValue: (initialValues) => initialValues.favoriteArtists,
         arrayMember: {
           defaultValues: { name: "", album: "" },
-          validations: [],
+          validations: [eitherAllOrNone({errorMessage:"fields should either all be valid or empty"})],
           children: [
             textInput({
               id: 'name',
               getValue: (defaultValues) => defaultValues.name,
-              isRequiredField: true,
+              isRequiredField: false,
               validations: [
-                isNotEmpty({ errorMessage: 'this value is mandatory' }),
+                minLength({ errorMessage: 'minimum text length is 2 characters', minLength: 2 }),
                 maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
               ]
             }),
             textInput({
               id: 'album',
               getValue: (defaultValues) => defaultValues.album,
-              isRequiredField: true,
+              isRequiredField: false,
               validations: [
-                isNotEmpty({ errorMessage: 'this value is mandatory' }),
+                minLength({ errorMessage: 'minimum text length is 2 characters', minLength: 2 }),
                 maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
               ]
             })

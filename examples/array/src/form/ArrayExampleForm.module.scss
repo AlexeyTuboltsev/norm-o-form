@@ -1,3 +1,5 @@
+@import "src/common";
+
 .variantContainer {
   grid-column: 1 / span 2;
 
@@ -17,4 +19,32 @@
   grid-gap: 10px;
 
   justify-items: flex-end;
+}
+
+.array {
+  grid-column: 1 / span 2;
+
+  display: grid;
+  grid-template: 1fr / 1fr;
+  grid-gap: 20px;
+
+  padding: 8px;
+  border: 1px solid $gray-color;
+  border-radius: 8px;
+}
+
+.arrayMember {
+  display: grid;
+  grid-template: 1fr / 1fr 1fr;
+  grid-column-gap: 20px;
+  grid-auto-flow: row;
+  grid-auto-rows: auto;
+}
+
+.arrayMemberError {
+  grid-column: 1 / span 2;
+
+  font-size: 13px;
+  color: $error-message-color;
+  text-align: right;
 }

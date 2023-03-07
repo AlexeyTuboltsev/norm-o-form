@@ -72,7 +72,8 @@ export function setSelfAndParentsTouched(formGenerator: TFormGenerator, id: stri
 }
 
 export function findFirstErrorToShow(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
-  return mapParentTree(findErrorToShow, formGenerator, id, formData);
+  const removeAllShowErrorFlags = mapParentTree(removeShowErrorFlag, formGenerator, id, formData);
+  return mapParentTree(findErrorToShow, formGenerator, id, removeAllShowErrorFlags);
 }
 
 //*******//
@@ -142,6 +143,18 @@ function findErrorToShow<T extends TFormData>(_formGenerator: TFormGenerator, id
       showError,
     },
     !Boolean(fieldData.errors.length) && fieldData.touched,
+  ];
+}
+
+function removeShowErrorFlag<T extends TFormData>(_formGenerator: TFormGenerator, id: string, formData: T): [TFormFieldData, boolean] {
+  const fieldData = formData[id];
+  const showError = false;
+  return [
+    {
+      ...fieldData,
+      showError,
+    },
+    true
   ];
 }
 
