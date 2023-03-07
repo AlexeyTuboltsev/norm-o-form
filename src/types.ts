@@ -3,7 +3,7 @@ export type TValidationFn = (id: string, data: TFormData) => undefined | string
 
 export type TGeneralFormData = {
   children: string[];
-  id: string;
+  path: string;
   lookupPath: string;
   errors: string[];
   showError: boolean;
@@ -19,6 +19,7 @@ export enum EFormTypes {
   INTEGER_INPUT = 'integerInput',
   VALIDATION_GROUP = 'validationGroup',
   ARRAY = 'array',
+  ARRAY_MEMBER = 'arrayMember',
   ONE_OF = 'oneOf',
 }
 
@@ -30,10 +31,11 @@ export enum EButtonState {
 
 export type TRootGenerator = {
   type: EFormTypes.ROOT;
-  id: string,
+  path: string,
   lookupPath: string;
   children: string[];
   validations: TValidationFn[]
+  getValue: <T>(initialValues:T)=> T //pass through
   generate: (value: any) => TRootFormData
 }
 
@@ -41,62 +43,79 @@ export type TRootFormData = { type: EFormTypes.ROOT } & TGeneralFormData;
 
 export type TValidationGroupGenerator = {
   type: EFormTypes.VALIDATION_GROUP;
-  id: string,
-  lookupPath: string;
+  path: string,
   children: string[];
   validations: TValidationFn[]
-  generate: (value: any) => TValidationGroupData
+  getValue: <T>(initialValues:T)=> T //pass through
+  generate: (options:{lookupPath:string}) => TValidationGroupData
 }
 
 export type TValidationGroupData = { type: EFormTypes.VALIDATION_GROUP } & TGeneralFormData;
 
 export type TOneOfGenerator = {
   type: EFormTypes.ONE_OF;
-  id: string,
-  lookupPath: string;
+  path: string,
   children: string[];
   validations: TValidationFn[]
-  initialValue: string;
-  generate: (options: { value: any }) => TOneOfData
+  getValue: (initialValues:any) => string;
+  generate: (options: { value: any, lookupPath:string }) => TOneOfData
 }
 
 export type TOneOfData = { type: EFormTypes.ONE_OF; value: string; options: { key: string; label: string }[]; } & TGeneralFormData
 
 export type TTextInputGenerator = {
   type: EFormTypes.TEXT_INPUT;
-  id: string,
-  lookupPath: string;
+  id: string;
+  path: string,
   children: [];
   validations: TValidationFn[]
-  initialValue: string;
-  generate: (options: { value: any }) => TTextFieldData
+  getValue: (initialValues:any) => string;
+  generate: (options: { value: string,lookupPath:string }) => TTextFieldData
 }
 
 export type TTextFieldData = { type: EFormTypes.TEXT_INPUT; value: string } & TGeneralFormData;
 
 export type TSelectGenerator = {
   type: EFormTypes.SELECT;
-  id: string,
-  lookupPath: string;
+  path: string,
   children: [];
   validations: TValidationFn[]
-  initialValue: string;
-  generate: (options: { value: any }) => TSelectFieldData
+  getValue: (initialValues:any) => string;
+  generate: (options: { value: any,lookupPath:string }) => TSelectFieldData
 }
 
 export type TSelectFieldData = { type: EFormTypes.SELECT; value: string; options: Array<{ key: string; label: string }>; } & TGeneralFormData
 
 export type TNumericGenerator = {
   type: EFormTypes.INTEGER_INPUT;
-  id: string,
-  lookupPath: string;
+  path: string,
   children: [];
   validations: TValidationFn[]
-  initialValue: string;
-  generate: (options: { value: any }) => TNumericFieldData
+  getValue: (initialValues:any) => string;
+  generate: (options: { value: any,lookupPath:string }) => TNumericFieldData
 }
 export type TNumericFieldData = { type: EFormTypes.INTEGER_INPUT; value: string } & TGeneralFormData;
 
+export type TArrayGenerator = {
+  type: EFormTypes.ARRAY;
+  path: string,
+  children: string[];
+  validations: TValidationFn[]
+  getValue: (initialValues:any) => any[];
+  generate: (options: { children: string[],lookupPath:string }) => TArrayData
+}
+
+export type TArrayData = {type :EFormTypes.ARRAY} & TGeneralFormData
+
+export type TArrayMemberGenerator = {
+  type: EFormTypes.ARRAY_MEMBER;
+  path: string,
+  children: string[];
+  validations: TValidationFn[];
+  getValue: <T>(initialValues:T)=> T //pass through
+  generate: (options: { childrenPaths:string[], path:string }) => TArrayMemberData
+}
+export type TArrayMemberData = {type :EFormTypes.ARRAY_MEMBER} & TGeneralFormData
 
 export type TFormFieldGenerator =
   | TRootGenerator
@@ -105,6 +124,8 @@ export type TFormFieldGenerator =
   | TTextInputGenerator
   | TSelectGenerator
   | TNumericGenerator
+  | TArrayGenerator
+  | TArrayMemberGenerator;
 
 
 export type TFormFieldData =
@@ -113,7 +134,9 @@ export type TFormFieldData =
   | TTextFieldData
   | TSelectFieldData
   | TNumericFieldData
-  | TOneOfData;
+  | TOneOfData
+  | TArrayData
+  | TArrayMemberData;
 
 
 export type TFormData = { [key: string]: TFormFieldData };

@@ -28,7 +28,6 @@ export const OneOfExampleForm: React.FunctionComponent<TFormWrapperProps<TOneOfE
   return <FormWrapper
     formId={formId}
   >
-    {/*<FormError fieldData={formData["oneOfExampleForm"]} />*/}
     < TextInput
       {...formData["oneOfExampleForm.appName"]}
       label="appName"

@@ -19,6 +19,7 @@ function chooseOneOf(
     formGenerator,
     formDataWithoutVariantSubtree,
     fieldId,
+    fieldId,//todo
     value
   )
 }

@@ -6,7 +6,7 @@
   "main": "src/index.ts",
   "dependencies": {},
   "scripts": {
-    "build:install:dev": "tsc && cd examples/simple-form && rm -fr node_modules/norm-o-form &&  yarn install --check-files && cd ../..",
+    "build:install:dev": "tsc && cd examples/array && rm -fr node_modules/norm-o-form &&  yarn install --check-files && cd ../..",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "build": "react-app-rewired build",
     "test": "jest",

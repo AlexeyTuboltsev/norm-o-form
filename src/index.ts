@@ -21,6 +21,7 @@ import {
   maxLength,
   isValidEmailAddress,
   isGeoCoordinate,
+  hasMinMembers,
 } from "./validators"
 import {
   validateForm,
@@ -55,6 +56,7 @@ export {
   maxLength,
   isValidEmailAddress,
   isGeoCoordinate,
+  hasMinMembers,
 
   formDataToButtonState,
   getFormRoot,

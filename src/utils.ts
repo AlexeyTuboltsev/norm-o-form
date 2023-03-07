@@ -118,8 +118,8 @@ export function removeChildren(id: string, formData: TFormData): TFormData {
 
 }
 
-export function generateFullPath(path: string, parentPath?: string): string {
-  return parentPath ? `${parentPath}.${path}` : path;
+export function generateFullPath(id: string, parentPath?: string): string {
+  return parentPath ? `${parentPath}.${id}` : id;
 }
 
 export function getParentPath(id: string) {

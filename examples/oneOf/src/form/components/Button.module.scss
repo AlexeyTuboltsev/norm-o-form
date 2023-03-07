@@ -1,0 +1,75 @@
+@import "src/common";
+
+.buttonBase {
+  min-width: 100px;
+  height: 43px;
+
+  padding: 10px;
+  font-size: 16px;
+
+  border: 2px solid $blue-color;
+  border-radius: 8px;
+
+  background-color: transparent;
+
+  cursor: pointer;
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: $blue-color;
+    color: #ffffff
+  }
+}
+
+.buttonDisabled{
+  color: $gray-color;
+  cursor: default;
+  border: 2px solid $gray-color;
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: $gray-color;
+    color: #ffffff
+  }
+}
+
+.buttonLoadingWrapper {
+  height: 43px;
+  position: relative;
+}
+
+.buttonLoading{
+  position: relative;
+  color: transparent;
+  border: 2px solid $gray-color;
+
+  cursor: default;
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: transparent;
+  }
+}
+
+
+.starterButton {
+  padding: 10px;
+  font-size: 16px;
+
+  border: 2px solid $blue-color;
+  border-radius: 8px;
+
+  background-color: transparent;
+
+  cursor: pointer;
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: $blue-color;
+    color: #ffffff
+  }
+}
