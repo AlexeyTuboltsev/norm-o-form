@@ -32,7 +32,7 @@ export enum EButtonState {
 export type TRootGenerator = {
   type: EFormTypes.ROOT;
   path: string,
-  lookupPath: string;
+  id: string;
   children: string[];
   validations: TValidationFn[]
   getValue: <T>(initialValues:T)=> T //pass through
@@ -44,10 +44,11 @@ export type TRootFormData = { type: EFormTypes.ROOT } & TGeneralFormData;
 export type TValidationGroupGenerator = {
   type: EFormTypes.VALIDATION_GROUP;
   path: string,
+  id: string;
   children: string[];
   validations: TValidationFn[]
   getValue: <T>(initialValues:T)=> T //pass through
-  generate: (options:{lookupPath:string}) => TValidationGroupData
+  generate: (input:{path:string}) => TValidationGroupData
 }
 
 export type TValidationGroupData = { type: EFormTypes.VALIDATION_GROUP } & TGeneralFormData;
@@ -55,22 +56,23 @@ export type TValidationGroupData = { type: EFormTypes.VALIDATION_GROUP } & TGene
 export type TOneOfGenerator = {
   type: EFormTypes.ONE_OF;
   path: string,
+  id: string;
   children: string[];
   validations: TValidationFn[]
   getValue: (initialValues:any) => string;
-  generate: (options: { value: any, lookupPath:string }) => TOneOfData
+  generate: (input: { value: any, path:string }) => TOneOfData
 }
 
 export type TOneOfData = { type: EFormTypes.ONE_OF; value: string; options: { key: string; label: string }[]; } & TGeneralFormData
 
 export type TTextInputGenerator = {
   type: EFormTypes.TEXT_INPUT;
-  id: string;
   path: string,
+  id: string;
   children: [];
   validations: TValidationFn[]
   getValue: (initialValues:any) => string;
-  generate: (options: { value: string,lookupPath:string }) => TTextFieldData
+  generate: (input: { value: string,path:string }) => TTextFieldData
 }
 
 export type TTextFieldData = { type: EFormTypes.TEXT_INPUT; value: string } & TGeneralFormData;
@@ -78,10 +80,11 @@ export type TTextFieldData = { type: EFormTypes.TEXT_INPUT; value: string } & TG
 export type TSelectGenerator = {
   type: EFormTypes.SELECT;
   path: string,
+  id: string;
   children: [];
   validations: TValidationFn[]
   getValue: (initialValues:any) => string;
-  generate: (options: { value: any,lookupPath:string }) => TSelectFieldData
+  generate: (input: { value: any,path:string }) => TSelectFieldData
 }
 
 export type TSelectFieldData = { type: EFormTypes.SELECT; value: string; options: Array<{ key: string; label: string }>; } & TGeneralFormData
@@ -89,20 +92,22 @@ export type TSelectFieldData = { type: EFormTypes.SELECT; value: string; options
 export type TNumericGenerator = {
   type: EFormTypes.INTEGER_INPUT;
   path: string,
+  id: string;
   children: [];
   validations: TValidationFn[]
   getValue: (initialValues:any) => string;
-  generate: (options: { value: any,lookupPath:string }) => TNumericFieldData
+  generate: (input: { value: any,path:string }) => TNumericFieldData
 }
 export type TNumericFieldData = { type: EFormTypes.INTEGER_INPUT; value: string } & TGeneralFormData;
 
 export type TArrayGenerator = {
   type: EFormTypes.ARRAY;
   path: string,
+  id: string;
   children: string[];
   validations: TValidationFn[]
   getValue: (initialValues:any) => any[];
-  generate: (options: { children: string[],lookupPath:string }) => TArrayData
+  generate: (input: { childrenPaths: string[],path:string }) => TArrayData
 }
 
 export type TArrayData = {type :EFormTypes.ARRAY} & TGeneralFormData
@@ -110,10 +115,11 @@ export type TArrayData = {type :EFormTypes.ARRAY} & TGeneralFormData
 export type TArrayMemberGenerator = {
   type: EFormTypes.ARRAY_MEMBER;
   path: string,
+  id: string;
   children: string[];
   validations: TValidationFn[];
   getValue: <T>(initialValues:T)=> T //pass through
-  generate: (options: { childrenPaths:string[], path:string }) => TArrayMemberData
+  generate: (input: { childrenPaths:string[], path:string }) => TArrayMemberData
 }
 export type TArrayMemberData = {type :EFormTypes.ARRAY_MEMBER} & TGeneralFormData
 

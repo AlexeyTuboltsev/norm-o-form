@@ -66,11 +66,11 @@ export function arrayExampleForm(
         isRequiredField: true,
       }),
       oneOf({
-        path: 'myVariants',
+        id: 'myVariants',
         getValue:  (initialValues) => initialValues.type,
         // defaultValues: {},
         switcherOptions: {
-          path: 'switcher',
+          // path: 'switcher',
           options: Object.values(EOneOfType).map((option) => ({ key: option, label: option })),
         },
         variants: {
