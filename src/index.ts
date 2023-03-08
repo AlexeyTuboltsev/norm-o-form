@@ -22,6 +22,8 @@ import {
   isValidEmailAddress,
   isGeoCoordinate,
   hasMinMembers,
+  eitherAllOrNone,
+  isValidPhoneNumber
 } from "./validators"
 import {
   validateForm,
@@ -57,6 +59,8 @@ export {
   isValidEmailAddress,
   isGeoCoordinate,
   hasMinMembers,
+  eitherAllOrNone,
+  isValidPhoneNumber,
 
   formDataToButtonState,
   getFormRoot,

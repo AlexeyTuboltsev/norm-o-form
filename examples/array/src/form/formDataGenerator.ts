@@ -1,9 +1,9 @@
 import {
   array,
   formRoot,
-  hasMinMembers, isGeoCoordinate,
+  hasMinMembers,
   isNotEmpty,
-  isValidEmailAddress,
+  isValidEmailAddress, isValidPhoneNumber,
   maxLength, oneOf,
   textInput,
   TSelectFieldData,
@@ -29,9 +29,8 @@ export const initialFormValues = {
   firstName: "John",
   lastName: "Doe",
   type: EOneOfType.option2 as const,
-  zzz: 'zzz_value',
-  xxx1: 'xxx1_val',
-  xxx2: 'xsadf',
+  phone: 'xxx1_val',
+  fax: '22',
   favoriteArtists: [
     { name: "The Clash", album: "Combat Rock" },
     { name: "Robert Wyatt", album: "Rock Bottom" },
@@ -60,7 +59,6 @@ export function arrayExampleForm(
         getValue: (initialValues) => initialValues.lastName,
         validations: [
           isNotEmpty({ errorMessage: 'this value is mandatory' }),
-          isValidEmailAddress({ errorMessage: 'please provide a valid email' }),
           maxLength({ errorMessage: 'maximum text length is 100 characters', maxLength: 100 }),
         ],
         isRequiredField: true,
@@ -68,18 +66,17 @@ export function arrayExampleForm(
       oneOf({
         id: 'myVariants',
         getValue:  (initialValues) => initialValues.type,
-        // defaultValues: {},
+        // defaultValues: {}, //todo
         switcherOptions: {
-          // path: 'switcher',
           options: Object.values(EOneOfType).map((option) => ({ key: option, label: option })),
         },
         variants: {
           [EOneOfType.option1]: {
             children: [
               textInput({
-                id: 'zzz',
-                validations: [isGeoCoordinate({ errorMessage: 'this is not a geo coordinate' })],
-                getValue: (initialValues) => initialValues.zzz,
+                id: 'email',
+                validations: [isValidEmailAddress({ errorMessage: 'this is not an email' })],
+                getValue: (initialValues) => initialValues.email,
                 isRequiredField: false,
               }),
             ],
@@ -87,15 +84,15 @@ export function arrayExampleForm(
           [EOneOfType.option2]: {
             children: [
               textInput({
-                id: 'xxx1',
-                validations: [isValidEmailAddress({ errorMessage: 'xxx1 does not contain a valid email' })],
-                getValue: (initialValues) => initialValues.xxx1,
+                id: 'phone',
+                validations: [isValidPhoneNumber({ errorMessage: 'this is not a valid phone number' })],
+                getValue: (initialValues) => initialValues.phone,
                 isRequiredField: true,
               }),
               textInput({
-                id: 'xxx2',
-                validations: [isValidEmailAddress({ errorMessage: 'xxx1 is not an email' })],
-                getValue: (initialValues) => initialValues.xxx2,
+                id: 'fax',
+                validations: [isValidPhoneNumber({ errorMessage: 'this is not a valid phone number' })],
+                getValue: (initialValues) => initialValues.fax,
                 isRequiredField: false,
               }),
             ],
@@ -108,7 +105,7 @@ export function arrayExampleForm(
         getValue: (initialValues) => initialValues.favoriteArtists,
         arrayMember: {
           defaultValues: { name: "", album: "" },
-          validations: [eitherAllOrNone({errorMessage:"fields should either all be valid or empty"})],
+          validations: [eitherAllOrNone({errorMessage:"both fields should either be valid or empty"})],
           children: [
             textInput({
               id: 'name',

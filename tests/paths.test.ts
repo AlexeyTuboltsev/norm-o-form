@@ -164,12 +164,12 @@ describe("getFormRootId()", () => {
       ...testFormData
     } as unknown as TFormData
 
-    const result = getFormRootId(formData)
+    const result = getFormRootId(formData as any)
     expect(result).toEqual(rootId);
   })
 
   test("doesn't find the root form ID if it's not there", () => {
-    const result = getFormRootId(testFormData as unknown as TFormData)
+    const result = getFormRootId(testFormData as any)
     expect(result).toBeUndefined()
   })
 })

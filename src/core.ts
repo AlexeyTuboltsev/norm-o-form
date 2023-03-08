@@ -1,8 +1,14 @@
-import { generateFullPath, generateRandomString, getFormRootId, isPrimitiveValueField, mapParentTree } from './utils';
+import {
+  filter,
+  generateFullPath,
+  generateRandomString,
+  getFormRootId,
+  isPrimitiveValueField,
+  mapParentTree
+} from './utils';
 import {
   EFormTypes,
-  TArrayGenerator,
-  TArrayMemberGenerator,
+  TArrayGenerator, TArrayMemberGenerator,
   TFormData,
   TFormFieldData,
   TFormFieldGenerator,
@@ -13,44 +19,44 @@ import {
 } from './types';
 
 
+type TDeriveUiStateArgs = [formGenerator: TFormGenerator, initialFormData: TFormData, path: string, value: any]
 
-export function deriveUiState(formGenerator: TFormGenerator, initialFormData: TFormData, path: string, lookupPath: string, value: any): TFormData {
-
+export function deriveInitialUiState(lookupPath: string, ...args: TDeriveUiStateArgs): TFormData {
+  const [formGenerator] = args
   const fieldGenerator = formGenerator[lookupPath]
 
   switch (fieldGenerator.type) {
     case EFormTypes.ARRAY:
-      return deriveArrayUiState(
-        formGenerator,
-        fieldGenerator,
-        initialFormData,
-        path,
-        value
-      )
+      return deriveArrayUiState(deriveInitialUiState, fieldGenerator, ...args)
 
     case EFormTypes.ARRAY_MEMBER:
-      return deriveArrayMemberUiState(
-        formGenerator,
-        fieldGenerator,
-        initialFormData,
-        path,
-        value
-      )
+      return deriveArrayMemberUiState(deriveInitialUiState, fieldGenerator, ...args)
 
     default:
-      return doDeriveUiState(
-        formGenerator,
-        fieldGenerator,
-        initialFormData,
-        path,
-        value
-      )
+      return doDeriveUiInitialState(deriveInitialUiState, fieldGenerator, ...args)
   }
 }
 
+export function deriveUiState(lookupPath: string, ...args: TDeriveUiStateArgs): TFormData {
+  const [formGenerator] = args
+  const fieldGenerator = formGenerator[lookupPath]
+
+  switch (fieldGenerator.type) {
+    case EFormTypes.ARRAY:
+      return deriveArrayUiState(deriveUiState, fieldGenerator, ...args)
+
+    case EFormTypes.ARRAY_MEMBER:
+      return deriveArrayMemberUiState(deriveUiState, fieldGenerator, ...args)
+
+    default:
+      return doDeriveUiState(deriveUiState, fieldGenerator, ...args)
+  }
+}
+
+
 export function generateForm(formGenerator: TFormGenerator, initialValues: any): TFormData {
   const rootId = getFormRootId(formGenerator)
-  const uiState = deriveUiState(formGenerator, {}, rootId, rootId, initialValues)
+  const uiState = deriveInitialUiState(rootId, formGenerator, {}, rootId, initialValues)
   console.log("generateForm", formGenerator, uiState)
   return validateForm(
     formGenerator,
@@ -159,74 +165,114 @@ function removeShowErrorFlag<T extends TFormData>(_formGenerator: TFormGenerator
 }
 
 function deriveArrayUiState(
-  formGenerator:TFormGenerator,
+  derive: any,
   fieldGenerator: TArrayGenerator,
+  formGenerator: TFormGenerator,
   initialFormData: TFormData,
   path: string,
   value: any
-){
+) {
 
-  //todo Map() to retain initial order
-  const keyedMemberValues:{ [key: string]: any } = fieldGenerator.getValue(value).reduce(<T>(acc: { [key: string]: T }, memberValue: T) => {
-    const memberId = generateFullPath(generateRandomString(3), path)
-    acc[memberId] = memberValue
-    return acc
-  }, {})
+  const keyedMemberValues: Map<string, any> = fieldGenerator.getValue(value).reduce(<T>(acc: Map<string, any>, memberValue: T) => {
+    const randomMemberId = generateFullPath(generateRandomString(3), path)
+    return acc.set(randomMemberId, memberValue)
+  }, new Map())
 
-  const arrayMemberGeneratorPath = fieldGenerator.children[0]
-  const childrenPaths = Object.keys(keyedMemberValues)
+  const arrayMemberGeneratorPath = fieldGenerator.children[0] //array always has one child - arrayMember
 
-  initialFormData[path] = fieldGenerator.generate({ path, childrenPaths })
+  initialFormData[path] = generateFieldData(fieldGenerator,value,path,Array.from(keyedMemberValues.keys()))
 
-  return initialFormData[path].children.reduce((_acc: any, childPath: string) => {
-    return deriveUiState(formGenerator, initialFormData, childPath, arrayMemberGeneratorPath, keyedMemberValues[childPath])
+  return Array.from(keyedMemberValues.keys()).reduce((_acc: any, childPath: string) => {
+    return derive(arrayMemberGeneratorPath, formGenerator, initialFormData, childPath, keyedMemberValues.get(childPath))
   }, initialFormData)
 }
 
 function deriveArrayMemberUiState(
-  formGenerator:TFormGenerator,
+  derive: any,
   fieldGenerator: TArrayMemberGenerator,
+  formGenerator: TFormGenerator,
   initialFormData: TFormData,
   path: string,
   value: any
-){
+) {
   const childrenGeneratorPaths = fieldGenerator.children
 
-  //todo Map() to retain initial order
-  const childrenPaths: { [key: string]: string } = childrenGeneratorPaths.reduce((acc: { [key: string]: string }, childGeneratorPath: string) => {
-    const id = (formGenerator[childGeneratorPath] as any).id
-    acc[childGeneratorPath] = generateFullPath(id, path)
-    return acc
-  }, {})
+  const lookupPathToChildPathMap = mapLookupPathToChildPath(formGenerator,path,childrenGeneratorPaths)
 
-  initialFormData[path] = fieldGenerator.generate({ path, childrenPaths: Object.values(childrenPaths) })
+  initialFormData[path] = generateFieldData(fieldGenerator,value, path,Array.from(lookupPathToChildPathMap.values()))
 
-  return Object.entries(childrenPaths).reduce((_acc: any, [childGeneratorPath, childPath]: [string, string]) => {
-    return deriveUiState(formGenerator, initialFormData, childPath, childGeneratorPath, value)
+  return Array.from(lookupPathToChildPathMap.entries()).reduce((_acc: any, [childGeneratorPath, childPath]: [string, string]) => {
+    return derive(childGeneratorPath, formGenerator, initialFormData, childPath, value)
+  }, initialFormData)
+}
+
+function doDeriveUiInitialState(
+  derive: any,
+  fieldGenerator: TFormFieldGenerator,
+  formGenerator: TFormGenerator,
+  initialFormData: TFormData,
+  path: string,
+  value: any
+) {
+  const childrenGeneratorPaths: string[] = fieldGenerator.children
+
+  const lookupPathToChildPathMap = mapLookupPathToChildPath(formGenerator,path,childrenGeneratorPaths)
+
+  initialFormData[path] = generateInitialFieldData(fieldGenerator,value,path,Array.from(lookupPathToChildPathMap.values()))
+
+  //TODO create a special oneOf case in parent function
+  //in case of oneOf fieldGenerator.generate() returns only a subset of children,
+  //so we need to filter the rest out
+  const lookupPathToChildPathMapResolved = filter(lookupPathToChildPathMap, ([_k, v]) => initialFormData[path].children.includes(v))
+
+  return Array.from(lookupPathToChildPathMapResolved).reduce((_acc: any, [childGeneratorPath, childPath]: [string, string]) => {
+    return derive(childGeneratorPath, formGenerator, initialFormData, childPath, value)
   }, initialFormData)
 }
 
 function doDeriveUiState(
-  formGenerator:TFormGenerator,
+  derive: any,
   fieldGenerator: TFormFieldGenerator,
+  formGenerator: TFormGenerator,
   initialFormData: TFormData,
   path: string,
   value: any
-){
-  const childrenGeneratorPaths = fieldGenerator.children
+) {
+  const childrenGeneratorPaths: string[] = fieldGenerator.children
 
-  const childrenPaths = childrenGeneratorPaths.map((childrenGeneratorPath: string) => {
-    const id = (formGenerator[childrenGeneratorPath] as any).id
-    return generateFullPath(id, path)
+  const lookupPathToChildPathMap = mapLookupPathToChildPath(formGenerator,path,childrenGeneratorPaths)
 
-  })
-  initialFormData[path] = fieldGenerator.generate({
+  initialFormData[path] = generateFieldData(fieldGenerator,value,path,Array.from(lookupPathToChildPathMap.values()))
+
+  //TODO write a special oneOf case in parent function
+  //in case of oneOf fieldGenerator.generate() returns only a subset of children,
+  //so we need to filter the rest out
+  const lookupPathToChildPathMapResolved = filter(lookupPathToChildPathMap, ([_k, v]) => initialFormData[path].children.includes(v))
+
+  return Array.from(lookupPathToChildPathMapResolved.entries()).reduce((_acc: any, [childGeneratorPath, childPath]: [string, string]) => {
+    return derive(childGeneratorPath, formGenerator, initialFormData, childPath, value)
+  }, initialFormData)
+}
+
+function mapLookupPathToChildPath(formGenerator:TFormGenerator,path:string,childrenGeneratorPaths:string[]):Map<string, string>{
+  return childrenGeneratorPaths.reduce((acc: Map<string, string>, childGeneratorPath: string) => {
+    const id = (formGenerator[childGeneratorPath] as any).id
+    return acc.set(childGeneratorPath, generateFullPath(id, path))
+  }, new Map())
+}
+
+function generateInitialFieldData(fieldGenerator:TFormFieldGenerator, value:any, path:string,childrenPaths:string[]) {
+  return fieldGenerator.generate({
     value: fieldGenerator.getValue(value),
     path,
     childrenPaths
   })
+}
 
-  return initialFormData[path].children.reduce((_acc: any, childPath: string) => {
-    return deriveUiState(formGenerator, initialFormData, childPath, childPath, value)
-  }, initialFormData)
+function generateFieldData(fieldGenerator:TFormFieldGenerator, value:any, path:string,childrenPaths:string[]) {
+  return fieldGenerator.generate({
+    value: value,
+    path,
+    childrenPaths
+  })
 }

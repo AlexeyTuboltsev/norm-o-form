@@ -44,6 +44,4 @@ export const SelectInput: React.FunctionComponent<TSelectInput> = ({
           </option>
         ))}
       </select>
-
-      {showError && touched && <div className="error">{errors}</div>}
-    </div>
+ </div>

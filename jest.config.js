@@ -4,5 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   roots: ["<rootDir>/src/", "<rootDir>/tests/"],
   collectCoverage: true,
-  coverageDirectory: "<rootDir>/coverage"
+  coverageDirectory: "<rootDir>/coverage",
+  verbose:true,
+  silent:false,
 };

@@ -14,7 +14,6 @@ type TFormWrapperProps<T> = {
 }
 
 const FormError = ({ fieldData, className }: { fieldData: TFormFieldData, className?: string }) => {
-  console.log(fieldData)
   const error = fieldData.errors[0]
   return error
     ? <div className={className}>{error}</div>
@@ -39,7 +38,6 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
     />
     <div className={styles.array}>
       {formData["arrayExampleForm.favoriteArtists"].children.map(arrayMemberPath => {
-        {console.log(formData, arrayMemberPath)}
         return <div key={arrayMemberPath} className={styles.arrayMember}>
             <TextInput
               {...((formData as any)[`${arrayMemberPath}.name`] as TTextFieldData)}
@@ -62,14 +60,14 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
       />
 
       {(formData as any)['arrayExampleForm.myVariants'].value === EOneOfType.option1 ? (
-        <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.zzz`]}
-                   label="zzz" />
+        <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.email`]}
+                   label="email" />
       ) : (
         <>
-          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.xxx1`]}
-                     label="xxx1" />
-          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.xxx2`]}
-                     label="xxx2" />
+          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.phone`]}
+                     label="phone" />
+          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.fax`]}
+                     label="fax" />
         </>
       )}
     </div>

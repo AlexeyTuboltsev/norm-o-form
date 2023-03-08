@@ -102,11 +102,11 @@ export function removeSubtree(id: string, formData: TFormData): TFormData {
   }
   delete formData[id]
 
-  const parentId = getParentPath(id)
-
-  if (parentId) {
-    formData[parentId].children = formData[parentId].children.filter(child => child !== id)
-  }
+  // const parentId = getParentPath(id)
+  //
+  // if (parentId) {
+  //   formData[parentId].children = formData[parentId].children.filter(child => child !== id)
+  // }
 
   return formData
 }
@@ -150,3 +150,9 @@ export function createChildrenGenerators<T extends TFormGenerator>(childrenFacto
   ) as any
 }
 
+export function filter<Ik, Iv>(input: Map<Ik, Iv>, filterFn: (input: [Ik, Iv]) => boolean) {
+  return new Map(
+    Array.from(input.entries())
+      .filter(entry => filterFn(entry))
+  )
+}

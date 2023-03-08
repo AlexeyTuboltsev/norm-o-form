@@ -2,49 +2,53 @@ import { controlDigitIsValid, isPrimitiveValueField } from './utils';
 import { TFormData } from "./types";
 
 export function isNumber(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return Number.isFinite(parseFloat((data[id] as any).value)) ? undefined : options.errorMessage;
   };
 }
 
 export function isInteger(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     const isValidNumber = !Boolean(isNumber(options)(id, data));
-    return isValidNumber && parseFloat((data[id] as any).value) === parseInt((data[id] as any).value) ? undefined : options.errorMessage;
+    return isValidNumber && parseFloat((data[id] as any).value) === parseInt((data[id] as any).value)
+      ? undefined
+      : options.errorMessage;
   };
 }
 
 export function isGreaterThan(options: { errorMessage: string; greaterThan: number }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return (data[id] as any).value > options.greaterThan ? undefined : options.errorMessage;
   };
 }
 
 export function isGeoCoordinate(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     const isValidNumber = !Boolean(isNumber(options)(id, data));
     // todo: now we're only checking for general format validity.
     // Need to check for validity as a geo coordinate (eg max 180degrees in the integer part etc).
 
-    return isValidNumber && new RegExp(/^[\+\-]?\d+(\.\d+)?$/).test((data[id] as any).value) ? undefined : options.errorMessage;
+    return isValidNumber && new RegExp(/^[\+\-]?\d+(\.\d+)?$/).test((data[id] as any).value)
+      ? undefined
+      : options.errorMessage;
   };
 }
 
 export function isValidGln13(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     const value = (data[id] as any).value.trim();
     return new RegExp(/^\d{13}$/).test(value) && controlDigitIsValid(value) ? undefined : options.errorMessage;
   };
 }
 
 export function hasMinMembers(options: { errorMessage: string; atLeast: number }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return data[id].children.length >= options.atLeast ? undefined : options.errorMessage;
   };
 }
 
 export function childrenAreValid(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     let childHasError = false;
 
     for (const childId of data[id].children) {
@@ -60,8 +64,8 @@ export function childrenAreValid(options: { errorMessage: string }) {
 }
 
 //todo now works only for primitive fields
-export function eitherAllOrNone(options: { errorMessage: string}){
-  return function (id:string, data: TFormData){
+export function eitherAllOrNone(options: { errorMessage: string }) {
+  return function (id: string, data: TFormData) {
 
     let childHasError = false;
     let childIsEmpty = false;
@@ -72,43 +76,57 @@ export function eitherAllOrNone(options: { errorMessage: string}){
       if (fieldData.errors.length !== 0) {
         childHasError = true;
         break;
-      } else if(isPrimitiveValueField(fieldData) && fieldData.value !== "" && fieldData.errors.length !== 0){
+      } else if (isPrimitiveValueField(fieldData) && fieldData.value !== "") {
         childIsValid = true
-      } else if(isPrimitiveValueField(fieldData) && fieldData.value === "") {
+      } else if (isPrimitiveValueField(fieldData) && fieldData.value === "") {
         childIsEmpty = true
       }
     }
-    return childHasError || (childIsEmpty !== childIsValid) ? options.errorMessage : undefined;
+    return childHasError || (childIsEmpty && childIsValid) ? options.errorMessage : undefined;
   };
 }
 
 
 export function isLessThan(options: { errorMessage: string; lessThan: number }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return parseFloat((data[id] as any).value) < options.lessThan ? undefined : options.errorMessage;
   };
 }
 
 export function isNotEmpty(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return (data[id] as any).value.trim() !== '' ? undefined : options.errorMessage;
   };
 }
 
 export function maxLength(options: { errorMessage: string; maxLength: number }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return (data[id] as any).value.trim().length <= options.maxLength ? undefined : options.errorMessage;
   };
 }
 
 export function minLength(options: { errorMessage: string; minLength: number }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     return (data[id] as any).value.trim().length >= options.minLength ? undefined : options.errorMessage;
   };
 }
 
+export function isValidPhoneNumber(options: { errorMessage: string }) {
+  return function (id: string, data: TFormData) {
+    const maybePhoneNumber = (data[id] as any).value?.trim()
+
+    if (maybePhoneNumber) {
+      return (new RegExp(/^\+?\d{1,3}(?:\(\d{1,3}\))?[\d -]+/).test(maybePhoneNumber.trim()))
+        ? undefined
+        : options.errorMessage;
+    } else {
+      return options.errorMessage;
+    }
+  }
+}
+
 export function isValidEmailAddress(options: { errorMessage: string }) {
-  return function (id:string, data:TFormData) {
+  return function (id: string, data: TFormData) {
     const localAndDomain = (data[id] as any).value.trim().split('@');
 
     if (localAndDomain.length === 2) {
