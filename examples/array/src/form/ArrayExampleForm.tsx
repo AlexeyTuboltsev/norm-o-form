@@ -8,6 +8,7 @@ import { TFormFieldData } from "norm-o-form/types";
 import { CancelFormButton, SubmitFormButton } from "./components/Button";
 import { formDataToButtonState, TTextFieldData } from "norm-o-form";
 import { AddArrayMemberFormButton } from "./components/ArrayActions";
+import { ArrayMember } from "./components/ArrayMember";
 
 type TFormWrapperProps<T> = {
   formId: string;
@@ -40,7 +41,7 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
     <div className={styles.array}>
       <AddArrayMemberFormButton id='arrayExampleForm.favoriteArtists' />
       {formData["arrayExampleForm.favoriteArtists"].children.map(arrayMemberPath => {
-        return <div key={arrayMemberPath} className={styles.arrayMember}>
+        return <ArrayMember key={arrayMemberPath} id={arrayMemberPath} className={styles.arrayMember}>
             <TextInput
               {...((formData as any)[`${arrayMemberPath}.name`] as TTextFieldData)}
               label="name"
@@ -51,7 +52,7 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
             />
 
             <FormError className={styles.arrayMemberError} fieldData= {(formData as any)[`${arrayMemberPath}`]} />
-          </div>
+          </ArrayMember>
         }
       )}
     </div>
