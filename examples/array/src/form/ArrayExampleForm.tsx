@@ -3,10 +3,11 @@ import { TextInput } from "./components/TextInput";
 import React from "react";
 import { SelectInput } from "./components/SelectInput";
 import styles from "./ArrayExampleForm.module.scss"
-import { EOneOfType, TArrayExampleForm } from "./formDataGenerator";
+import { EOneOfType, TArrayExampleForm } from "./formDefinition";
 import { TFormFieldData } from "norm-o-form/types";
 import { CancelFormButton, SubmitFormButton } from "./components/Button";
 import { formDataToButtonState, TTextFieldData } from "norm-o-form";
+import { AddArrayMemberFormButton } from "./components/ArrayActions";
 
 type TFormWrapperProps<T> = {
   formId: string;
@@ -37,6 +38,7 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
       label="lastName"
     />
     <div className={styles.array}>
+      <AddArrayMemberFormButton id='arrayExampleForm.favoriteArtists' />
       {formData["arrayExampleForm.favoriteArtists"].children.map(arrayMemberPath => {
         return <div key={arrayMemberPath} className={styles.arrayMember}>
             <TextInput

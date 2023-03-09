@@ -104,7 +104,7 @@ export function arrayExampleForm(
         validations: [hasMinMembers({ errorMessage: 'array should have at least 1 member', atLeast: 1 })],
         getValue: (initialValues) => initialValues.favoriteArtists,
         arrayMember: {
-          defaultValues: { name: "", album: "" },
+          defaultValue: { name: "", album: "" },
           validations: [eitherAllOrNone({errorMessage:"both fields should either be valid or empty"})],
           children: [
             textInput({

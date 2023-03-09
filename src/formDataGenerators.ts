@@ -12,7 +12,7 @@ export function formRoot({ formId, validations, children }:
   return {
     [formId]: {
       type: EFormTypes.ROOT as const,
-      id:formId,
+      id: formId,
       path: formId,
       children: childrenPaths,
       getValue: <T>(initialValues: T) => initialValues,
@@ -33,7 +33,7 @@ export function formRoot({ formId, validations, children }:
 }
 
 export function validationGroup({
-    id:generatorId,
+    id: generatorId,
     validations,
     children,
   }: { id: string, validations: TValidationFn[], children: Array<(parentId: string) => TFormGenerator> }
@@ -46,14 +46,14 @@ export function validationGroup({
       [fullGeneratorPath]: {
         type: EFormTypes.VALIDATION_GROUP as const,
         path: fullGeneratorPath,
-        id:generatorId,
+        id: generatorId,
         children: childrenPaths,
         getValue: <T>(initialValues: T) => initialValues, //pass through in container nodes
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
         generate: ({ path }: { path: string }) => ({
           type: EFormTypes.VALIDATION_GROUP as const,
           path,
-          lookupPath:fullGeneratorPath,
+          lookupPath: fullGeneratorPath,
           children: childrenPaths,
           isRequiredField: true,
           errors: [],
@@ -67,20 +67,20 @@ export function validationGroup({
 }
 
 export function array({
-  id:generatorId,
+  id: generatorId,
   validations,
   arrayMember: arrayMemberData,
   getValue
 }: { id: string, validations: TValidationFn[], arrayMember: any, getValue: (initialValues: any) => any[] }) {
   return function (parentGeneratorPath: string): TFormGenerator {
     const fullGeneratorPath = generateFullPath(generatorId, parentGeneratorPath);
-
     const { children, childrenPaths } = createChildrenGenerators(
       [
         arrayMember({
           id: arrayMemberKey,
           children: arrayMemberData.children,
           validations: arrayMemberData.validations,
+          defaultValue: arrayMemberData.defaultValue
         })],
       fullGeneratorPath);
 
@@ -88,13 +88,13 @@ export function array({
       [fullGeneratorPath]: {
         type: EFormTypes.ARRAY,
         path: fullGeneratorPath,
-        id:generatorId,
+        id: generatorId,
         children: childrenPaths,
         getValue,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
         generate: ({ childrenPaths, path }: { childrenPaths: string[], path: string }) => ({
           path,
-          lookupPath:fullGeneratorPath,
+          lookupPath: fullGeneratorPath,
           type: EFormTypes.ARRAY,
           children: childrenPaths,
           isRequiredField: true,
@@ -109,10 +109,11 @@ export function array({
 }
 
 export function arrayMember({
-    id:generatorId,
+    id: generatorId,
     validations,
     children,
-  }: { id: string, validations: TValidationFn[], children: Array<(parentId: string) => TFormGenerator> }
+    defaultValue
+  }: { id: string, validations: TValidationFn[], defaultValue: any, children: Array<(parentId: string) => TFormGenerator> }
 ): (parentPath: string) => TFormGenerator {
   return function (parentGeneratorPath: string) {
     const fullGeneratorPath = generateFullPath(generatorId, parentGeneratorPath);
@@ -122,9 +123,10 @@ export function arrayMember({
       [fullGeneratorPath]: {
         type: EFormTypes.ARRAY_MEMBER as const,
         path: fullGeneratorPath,
-        id:generatorId,
+        id: generatorId,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })].concat(validations),
         children: childrenPaths,
+        defaultValue,
         getValue: <T>(initialValues: T) => initialValues, //pass through in container nodes
         generate: ({ path, childrenPaths }: { childrenPaths: string[], path: string }) => ({
           type: EFormTypes.ARRAY_MEMBER as const,
@@ -144,7 +146,7 @@ export function arrayMember({
 
 
 export function oneOf({
-  id:generatorId,
+  id: generatorId,
   getValue,
   switcherOptions,
   variants,
@@ -174,7 +176,7 @@ export function oneOf({
       [fullGeneratorPath]: {
         type: EFormTypes.ONE_OF as const,
         path: fullGeneratorPath,
-        id:generatorId,
+        id: generatorId,
         children: childrenPaths,
         getValue,
         validations: [childrenAreValid({ errorMessage: 'some fields are invalid' })],
@@ -266,7 +268,7 @@ export function numericInput({
 }
 
 export function select({
-  id:generatorId,
+  id: generatorId,
   getValue,
   isRequiredField,
   options,
@@ -284,14 +286,14 @@ export function select({
       [fullGeneratorPath]: {
         type: EFormTypes.SELECT as const,
         path: fullGeneratorPath,
-        id:generatorId,
+        id: generatorId,
         children: [],
         getValue,
         validations,
         generate: ({ value, path }: { value: string, path: string }) => ({
           type: EFormTypes.SELECT as const,
-          path ,
-          lookupPath:fullGeneratorPath,
+          path,
+          lookupPath: fullGeneratorPath,
           value,
           isRequiredField,
           touched: false,

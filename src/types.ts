@@ -119,6 +119,7 @@ export type TArrayMemberGenerator = {
   children: string[];
   validations: TValidationFn[];
   getValue: <T>(initialValues:T)=> T //pass through
+  defaultValue:any,
   generate: (input: { childrenPaths:string[], path:string, value: undefined }) => TArrayMemberData
 }
 export type TArrayMemberData = {type :EFormTypes.ARRAY_MEMBER} & TGeneralFormData

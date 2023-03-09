@@ -1,11 +1,13 @@
 import {
+  deriveInitialUiState,
   deriveUiState,
   findFirstErrorToShow,
-  setSelfAndParentsTouched, validateForm,
+  setSelfAndParentsTouched,
+  validateForm,
   validateSelfAndParents,
 } from './core';
-import { EFormTypes, TFormData, TFormGenerator } from './types';
-import {  isPrimitiveValueField, removeSubtree } from './utils';
+import { EFormTypes, TArrayMemberGenerator, TFormData, TFormGenerator } from './types';
+import { generateFullPath, generateRandomString, isPrimitiveValueField, removeSubtree } from './utils';
 
 function chooseOneOf(
   formGenerator: TFormGenerator,
@@ -15,7 +17,7 @@ function chooseOneOf(
 ): TFormData {
   const formDataWithoutVariantSubtree = removeSubtree(fieldId, formData);
 
-  return  deriveUiState(
+  return deriveUiState(
     fieldId,//todo lookupPath
     formGenerator,
     formDataWithoutVariantSubtree,
@@ -46,6 +48,40 @@ export function handleFormChange(formGenerator: TFormGenerator, id: string, form
   }
 }
 
-export function handleFormBlur(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
-  return findFirstErrorToShow(formGenerator, id, formData);
+export function handleFormBlur(formGenerator: TFormGenerator, fieldId: string, formData: TFormData): TFormData {
+  return findFirstErrorToShow(formGenerator, fieldId, formData);
 }
+
+export function insertArrayMember(formGenerator: TFormGenerator, fieldId: string, formData: TFormData, position:number): TFormData {
+
+  const generatorPath = formData[fieldId].lookupPath
+  const fieldGenerator = formGenerator[generatorPath]
+  if (fieldGenerator.type !== EFormTypes.ARRAY) {
+    return formData
+  } else {
+
+    const arrayMemberGeneratorPath = fieldGenerator.children[0] //arrayGenerator has only one child
+    const memberPath = generateFullPath(generateRandomString(3), fieldId)
+
+    const arrayMemberGenerator = formGenerator[arrayMemberGeneratorPath] as TArrayMemberGenerator
+
+    const newMember = deriveInitialUiState(
+      arrayMemberGeneratorPath,
+      formGenerator,
+      {},
+      memberPath,
+      arrayMemberGenerator.defaultValue
+    )
+
+    const newMemberValidated = validateForm(formGenerator, newMember)
+
+    formData[fieldId].children.splice(position, 0, memberPath)
+
+    return {
+      ...formData,
+      ...newMemberValidated
+    }
+  }
+}
+
+

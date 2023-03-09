@@ -1,5 +1,5 @@
 # Norm-O-Form
-_Under heavy development_
+_Under active development_
 
 A declarative and type safe form validation framework for react/redux. 
 Aims to simplify handling of validation of complex forms, including cross-validation and conditional validation of form blocks, at the same time allowing for a nice UX

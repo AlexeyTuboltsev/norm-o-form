@@ -6,7 +6,7 @@ import { EButtonState } from "norm-o-form/types";
 import { Loader } from "./Loader";
 import cn from 'classnames'
 
-type TButtonAction = {type: EFormActionType.OPEN_FORM | EFormActionType.CLOSE_FORM | EFormActionType.SUBMIT_FORM}
+type TButtonAction = {type: EFormActionType}
 
 function noop(){return}
 
@@ -32,6 +32,8 @@ export const CancelFormButton = () =>
     action={formActions.closeForm}
     label="Cancel"
   />
+
+
 
 export const SubmitFormButton = ({buttonState}:{buttonState:EButtonState}) => {
   const label = "Submit"

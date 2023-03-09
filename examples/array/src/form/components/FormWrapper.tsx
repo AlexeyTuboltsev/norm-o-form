@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './FormWrapper.module.scss';
 import { EFormUpdateType, formActions, TFormUpdate } from "../formReducer";
 import { useDispatch } from "react-redux";
-import { TArrayExampleForm } from "../formDataGenerator";
+import { TArrayExampleForm } from "../formDefinition";
 
 type TFormWrapperProps<T> = {
   formId: string;
@@ -15,7 +15,7 @@ export const FormWrapper: React.FunctionComponent<TFormWrapperProps<TArrayExampl
   children,
 }) => {
   const dispatch = useDispatch()
-  const action = (value: string, fieldId: string, updateType: EFormUpdateType) =>
+  const action = (value: string, fieldId: string, updateType: EFormUpdateType.PASTE | EFormUpdateType.BLUR | EFormUpdateType.FOCUS | EFormUpdateType.CHANGE) =>
     formActions.updateForm({
       formId,
       value,
@@ -25,6 +25,12 @@ export const FormWrapper: React.FunctionComponent<TFormWrapperProps<TArrayExampl
 
   return <div
     className={styles.formContainer}
+    onClick={(event: React.MouseEvent<HTMLInputElement>) => {
+      if((event.target as HTMLInputElement).id?.startsWith(formId)) {
+        event.stopPropagation();
+        dispatch(formActions.updateForm({ formId, fieldId:(event.target as HTMLInputElement).id, updateType:EFormUpdateType.INSERT_ARRAY_MEMBER, position:0 }))
+      }
+    }}
     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
       event.stopPropagation();
       dispatch(action(event.target.value, event.target.id, EFormUpdateType.CHANGE))

@@ -2,7 +2,7 @@ import {
   filter,
   generateFullPath,
   generateRandomString,
-  getFormRootId,
+  getTopNodePath,
   isPrimitiveValueField,
   mapParentTree
 } from './utils';
@@ -55,8 +55,8 @@ export function deriveUiState(lookupPath: string, ...args: TDeriveUiStateArgs): 
 
 
 export function generateForm(formGenerator: TFormGenerator, initialValues: any): TFormData {
-  const rootId = getFormRootId(formGenerator)
-  const uiState = deriveInitialUiState(rootId, formGenerator, {}, rootId, initialValues)
+  const rootPath = getTopNodePath(formGenerator)
+  const uiState = deriveInitialUiState(rootPath, formGenerator, {}, rootPath, initialValues)
   console.log("generateForm", formGenerator, uiState)
   return validateForm(
     formGenerator,
@@ -65,8 +65,9 @@ export function generateForm(formGenerator: TFormGenerator, initialValues: any):
 }
 
 export function validateForm(formGenerator: TFormGenerator, formData: TFormData): TFormData {
-  const formRootId = getFormRootId(formGenerator);
-  return doValidateForm(formGenerator, formRootId, formData);
+
+  const topNodeId = getTopNodePath(formData)
+  return doValidateForm(formGenerator, topNodeId, formData);
 }
 
 export function validateSelfAndParents(formGenerator: TFormGenerator, id: string, formData: TFormData): TFormData {
@@ -112,6 +113,7 @@ function validateField(formGenerator: TFormGenerator, id: string, formData: TFor
     errors = [];
   } else {
     const validations = formGenerator[fieldData.lookupPath].validations
+
     for (const validationFn of validations) {
       const validationResult = validationFn(id, formData);
       if (validationResult) {

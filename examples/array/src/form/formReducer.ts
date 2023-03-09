@@ -1,6 +1,6 @@
 import produce from "immer";
-import { generateForm, handleFormBlur, handleFormChange } from "norm-o-form";
-import { arrayExampleForm, initialFormValues, TArrayExampleForm } from "./formDataGenerator";
+import { insertArrayMember, generateForm, handleFormBlur, handleFormChange } from "norm-o-form";
+import { arrayExampleForm, initialFormValues, TArrayExampleForm } from "./formDefinition";
 import { GetReturnType } from "./utils";
 
 
@@ -21,9 +21,12 @@ export enum EFormUpdateType {
   CHANGE = "formUpdateType.change",
   PASTE = "formUpdateType.paste",
   BLUR = "formUpdateType.blur",
+  INSERT_ARRAY_MEMBER = "addArrayMember"
 }
 
-export type TFormUpdate = { updateType: EFormUpdateType, formId: string, fieldId: string, value: string }
+export type TFormUpdate =
+  |{ updateType: (EFormUpdateType.FOCUS|EFormUpdateType.CHANGE|EFormUpdateType.BLUR | EFormUpdateType.PASTE), formId: string, fieldId: string, value: string }
+  |{ updateType: EFormUpdateType.INSERT_ARRAY_MEMBER, formId: string, fieldId: string, position: number}
 
 const initialState: TFormReducer = {}
 
@@ -60,6 +63,13 @@ export const formReducer = produce((draftState: TFormReducer = initialState, act
             case EFormUpdateType.BLUR: {
               const formData = draftState.arrayExampleForm
               draftState.arrayExampleForm = handleFormBlur(formGenerator, action.payload.fieldId,formData, ) as TArrayExampleForm
+              break;
+            }
+            case EFormUpdateType.INSERT_ARRAY_MEMBER: {
+              const formData = draftState.arrayExampleForm
+              console.log("INSERT_ARRAY_MEMBER",action.payload)
+              const x = insertArrayMember(formGenerator, action.payload.fieldId,formData,action.payload.position ) as TArrayExampleForm
+              draftState.arrayExampleForm = x
               break;
             }
             default:

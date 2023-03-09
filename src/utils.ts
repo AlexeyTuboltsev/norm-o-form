@@ -24,15 +24,23 @@ export function getFormRoot<T extends TFormFieldData>(formData: TFormData): T {
   return rootField as T; // TODO, root is guaranteed to be there, fix typings.
 }
 
-export function getFormRootId(formData: TFormGenerator): string {
+export function getFormRootId(formGenerator: TFormGenerator): string {
   let rootFieldId;
-  for (const formFieldId in formData) {
-    if (formData[formFieldId].type === EFormTypes.ROOT) {
+  for (const formFieldId in formGenerator) {
+    if (formGenerator[formFieldId].type === EFormTypes.ROOT) {
       rootFieldId = formFieldId;
       break;
     }
   }
   return rootFieldId as string; // TODO, root is guaranteed to be there, fix typings.
+}
+
+export function getTopNodePath<T extends {[key:string]:any}>(formData:T):string {
+  return Object.keys(formData).sort((a,b)=> {
+    const lengthA = a.split(".").length
+    const lengthB = b.split(".").length
+    return lengthA < lengthB     ? lengthA : lengthB
+  })[0]
 }
 
 export function isPrimitiveValueField(
