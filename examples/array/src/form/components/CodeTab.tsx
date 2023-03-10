@@ -8,6 +8,7 @@ export const CodeTab:React.FunctionComponent<{code:string}> = ({code}) => {
       language="js"
       placeholder="Please enter JS code."
       padding={15}
+      readOnly={true}
       style={{
         fontSize: 12,
         backgroundColor: "#f5f5f5",

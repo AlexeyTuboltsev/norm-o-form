@@ -9,7 +9,7 @@ import {
   TFormData
 } from "norm-o-form";
 import { arrayExampleForm, initialFormValues, TArrayExampleForm } from "./formDefinition";
-import { GetReturnType } from "./utils";
+import { cleanupCode, GetReturnType, replacer } from "./utils";
 
 export enum ETab {
   FORM = 'form',
@@ -77,12 +77,13 @@ const formGenerator = arrayExampleForm(ARRAY_EXAMPLE_FORM_ROOT)
 const initialState: TFormReducer = {}
 
 
+
 export const formReducer = produce((draftState: TFormReducer = initialState, action: GetReturnType<typeof formActions & typeof viewActions>) => {
   switch (action.type) {
     case EFormActionType.OPEN_FORM:
       draftState.arrayExampleForm = {
-        formFunctionView: arrayExampleForm.toString(),
-        formGeneratorView: JSON.stringify(formGenerator, null, 2),
+        formFunctionView: cleanupCode(arrayExampleForm.toString()),
+        formGeneratorView: JSON.stringify(formGenerator, replacer, 2),
         form: generateForm(formGenerator, initialFormValues) as TArrayExampleForm,
         viewTab: ETab.FORM
       }

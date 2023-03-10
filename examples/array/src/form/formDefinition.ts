@@ -1,16 +1,19 @@
 import {
   array,
+  eitherAllOrNone,
   formRoot,
   hasMinMembers,
   isNotEmpty,
-  isValidEmailAddress, isValidPhoneNumber,
-  maxLength, oneOf,
+  isValidEmailAddress,
+  isValidPhoneNumber,
+  maxLength,
+  minLength,
+  oneOf,
   textInput,
   TSelectFieldData,
   TTextFieldData
 } from "norm-o-form";
 import { TArrayData, TRootFormData } from "norm-o-form/types";
-import { eitherAllOrNone, minLength } from "norm-o-form/validators";
 
 export enum EOneOfType {
   option1 = 'option1',
@@ -65,7 +68,7 @@ export function arrayExampleForm(
       }),
       oneOf({
         id: 'myVariants',
-        getValue:  (initialValues) => initialValues.type,
+        getValue: (initialValues) => initialValues.type,
         // defaultValues: {}, //todo
         switcherOptions: {
           options: Object.values(EOneOfType).map((option) => ({ key: option, label: option })),
@@ -105,7 +108,7 @@ export function arrayExampleForm(
         getValue: (initialValues) => initialValues.favoriteArtists,
         arrayMember: {
           defaultValue: { name: "", album: "" },
-          validations: [eitherAllOrNone({errorMessage:"both fields should either be valid or empty"})],
+          validations: [eitherAllOrNone({ errorMessage: "both fields should either be valid or empty" })],
           children: [
             textInput({
               id: 'name',

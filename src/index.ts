@@ -19,6 +19,7 @@ import {
 import {
   isNotEmpty,
   maxLength,
+  minLength,
   isValidEmailAddress,
   isGeoCoordinate,
   hasMinMembers,
@@ -61,6 +62,7 @@ export {
   moveArrayMember,
 
   isNotEmpty,
+  minLength,
   maxLength,
   isValidEmailAddress,
   isGeoCoordinate,
