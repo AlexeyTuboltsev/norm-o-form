@@ -34,7 +34,8 @@ import {
   handleFormChange,
   handleFormBlur,
   insertArrayMember,
-  removeArrayMember
+  removeArrayMember,
+  moveArrayMember
 } from "./handlers"
 import {
   formDataToButtonState,
@@ -57,6 +58,7 @@ export {
   handleFormChange,
   insertArrayMember,
   removeArrayMember,
+  moveArrayMember,
 
   isNotEmpty,
   maxLength,

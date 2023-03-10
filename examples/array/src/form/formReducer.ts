@@ -5,6 +5,7 @@ import {
   handleFormBlur,
   handleFormChange,
   removeArrayMember,
+  moveArrayMember,
   TFormData
 } from "norm-o-form";
 import { arrayExampleForm, initialFormValues, TArrayExampleForm } from "./formDefinition";
@@ -83,11 +84,11 @@ export const formReducer = produce((draftState: TFormReducer = initialState, act
             draftState.arrayExampleForm = insertArrayMember(formGenerator, action.payload.fieldId, formData, action.payload.position) as TArrayExampleForm
             break;
           }
-          // case EFormUpdateType.MOVE_ARRAY_MEMBER: {
-          //   const formData = draftState.arrayExampleForm
-          //   // draftState.arrayExampleForm = insertArrayMember(formGenerator, action.payload.fieldId,formData,action.payload.position ) as TArrayExampleForm
-          //   break;
-          // }
+          case EFormUpdateType.MOVE_ARRAY_MEMBER: {
+            const formData = draftState.arrayExampleForm
+            draftState.arrayExampleForm = moveArrayMember(formGenerator, action.payload.fieldId,formData, action.payload.targetPosition ) as TArrayExampleForm
+            break;
+          }
           case EFormUpdateType.REMOVE_ARRAY_MEMBER: {
             console.log("REMOVE_ARRAY_MEMBER")
             const formData = draftState.arrayExampleForm
