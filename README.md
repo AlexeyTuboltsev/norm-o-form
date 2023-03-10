@@ -4,10 +4,24 @@ _Under active development_
 A declarative and type safe form validation framework for react/redux. 
 Aims to simplify handling of validation of complex forms, including cross-validation and conditional validation of form blocks, at the same time allowing for a nice UX
 
+you can try it in its current state:
+
+`yarn install` in the root dir
+
+then
+
+`cd examples/array`
+
+and 
+`yarn install` there too. 
+norm-o-form will be linked as a local dependency.
+
+And finally `yarn start`
+
 ### Rationale
 
-In most popular front end form libraries validation seems to be an afterthought. They help a developer by wrapping html inputs in nicer and more developer-friendly components. Validation is exepcted to be done via yup, joi and the likes. 
-The problem is that these libraries expect a static object to return a set of errors. In reality filling out a from should be a dynamic UX experience for the user, where the errors and different behaviours of the form are meant as aide for the user, guiding them through the process. Often different validations for onChange, onBlur and onPaste events are necessary, it should be possible to change/hide entire sections of the form (and respective validations) depending on user input, dynamic cross-field validations should not be a pain. For sure this can be done with usual validation tools too, but code for validation of any non-trivial form quickly becomes a huge mess of conditionals and imperative programming. The purpose of this library is to create a set of utilities that simplify coding of complex validations and UX behaviours.   
+In most popular front end form libraries validation seems to be an afterthought. They help a developer by wrapping html inputs in nicer and more developer-friendly components. Validation is expected to be done via yup, joi and the likes. 
+The problem is that these libraries expect a static object to return a set of errors. In reality filling out a from should be a dynamic UX experience, where errors and different behaviours of the form are meant as aide for the user, guiding them through the process. Often different validations for onChange, onBlur and onPaste events are necessary, it should be possible to change/hide entire sections of the form (and respective validations) depending on user input, dynamic cross-field validations should not be a pain. For sure this can be done with usual validation tools too, but code for validation of any non-trivial form quickly becomes a huge mess of conditionals and imperative programming. The purpose of this library is to create a set of utilities that simplify coding of complex validations and UX behaviours.   
 
 
 ## How does it work
