@@ -7,7 +7,7 @@ import {
   validateSelfAndParents,
 } from './core';
 import { EFormTypes, TArrayMemberGenerator, TFormData, TFormGenerator } from './types';
-import { generateFullPath, generateRandomString, isPrimitiveValueField, removeSubtree } from './utils';
+import { generateFullPath, generateRandomString, getParentPath, isPrimitiveValueField, removeSubtree } from './utils';
 
 function chooseOneOf(
   formGenerator: TFormGenerator,
@@ -77,10 +77,28 @@ export function insertArrayMember(formGenerator: TFormGenerator, fieldId: string
 
     formData[fieldId].children.splice(position, 0, memberPath)
 
-    return {
+    return validateSelfAndParents(
+      formGenerator,
+      fieldId,
+      {
       ...formData,
       ...newMemberValidated
-    }
+    })
+  }
+}
+
+export function removeArrayMember(formGenerator: TFormGenerator, fieldPath: string, formData: TFormData, ): TFormData{
+  const parentPath = getParentPath(fieldPath)
+
+  if(parentPath){
+    const updatedFormData = removeSubtree(fieldPath, formData)
+    formData[parentPath].children = formData[parentPath].children.filter(childPath => childPath !== fieldPath)
+
+    return validateSelfAndParents(formGenerator, parentPath, updatedFormData)
+
+  } else {
+    //todo throw an error in dev environment
+    return formData
   }
 }
 

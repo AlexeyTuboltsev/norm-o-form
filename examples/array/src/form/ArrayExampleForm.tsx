@@ -40,8 +40,14 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
     />
     <div className={styles.array}>
       <AddArrayMemberFormButton id='arrayExampleForm.favoriteArtists' />
-      {formData["arrayExampleForm.favoriteArtists"].children.map(arrayMemberPath => {
-        return <ArrayMember key={arrayMemberPath} id={arrayMemberPath} className={styles.arrayMember}>
+      {formData["arrayExampleForm.favoriteArtists"].children.map((arrayMemberPath, index) => {
+          return <ArrayMember
+            key={arrayMemberPath}
+            id={arrayMemberPath}
+            className={styles.arrayMember}
+            arrayLength={formData["arrayExampleForm.favoriteArtists"].children.length}
+            currentPosition={index}
+          >
             <TextInput
               {...((formData as any)[`${arrayMemberPath}.name`] as TTextFieldData)}
               label="name"
@@ -51,7 +57,7 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
               label="album"
             />
 
-            <FormError className={styles.arrayMemberError} fieldData= {(formData as any)[`${arrayMemberPath}`]} />
+            <FormError className={styles.arrayMemberError} fieldData={(formData as any)[`${arrayMemberPath}`]} />
           </ArrayMember>
         }
       )}

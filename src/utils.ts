@@ -130,8 +130,8 @@ export function generateFullPath(id: string, parentPath?: string): string {
   return parentPath ? `${parentPath}.${id}` : id;
 }
 
-export function getParentPath(id: string) {
-  const idAsArray = id.split('.').slice(0, -1);
+export function getParentPath(fieldPath: string) {
+  const idAsArray = fieldPath.split('.').slice(0, -1);
   return idAsArray.length ? idAsArray.join('.') : null;
 }
 

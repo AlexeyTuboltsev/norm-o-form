@@ -17,7 +17,6 @@ export const FormWrapper: React.FunctionComponent<TFormWrapperProps<TArrayExampl
   const dispatch = useDispatch()
   const action = (value: string, fieldId: string, updateType: EFormUpdateType.PASTE | EFormUpdateType.BLUR | EFormUpdateType.FOCUS | EFormUpdateType.CHANGE) =>
     formActions.updateForm({
-      formId,
       value,
       fieldId,
       updateType
@@ -25,12 +24,6 @@ export const FormWrapper: React.FunctionComponent<TFormWrapperProps<TArrayExampl
 
   return <div
     className={styles.formContainer}
-    onClick={(event: React.MouseEvent<HTMLInputElement>) => {
-      if((event.target as HTMLInputElement).id?.startsWith(formId)) {
-        event.stopPropagation();
-        dispatch(formActions.updateForm({ formId, fieldId:(event.target as HTMLInputElement).id, updateType:EFormUpdateType.INSERT_ARRAY_MEMBER, position:0 }))
-      }
-    }}
     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
       event.stopPropagation();
       dispatch(action(event.target.value, event.target.id, EFormUpdateType.CHANGE))

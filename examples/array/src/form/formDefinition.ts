@@ -101,7 +101,7 @@ export function arrayExampleForm(
       }),
       array({
         id: 'favoriteArtists',
-        validations: [hasMinMembers({ errorMessage: 'array should have at least 1 member', atLeast: 1 })],
+        validations: [hasMinMembers({ errorMessage: 'array should have at least 3 members', atLeast: 3 })],
         getValue: (initialValues) => initialValues.favoriteArtists,
         arrayMember: {
           defaultValue: { name: "", album: "" },
