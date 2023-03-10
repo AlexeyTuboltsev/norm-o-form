@@ -142,8 +142,9 @@ function setFieldTouched<T extends TFormData>(_formGenerator: TFormGenerator, id
   ];
 }
 
-function findErrorToShow<T extends TFormData>(_formGenerator: TFormGenerator, id: string, formData: T): [TFormFieldData, boolean] {
-  const fieldData = formData[id];
+function findErrorToShow<T extends TFormData>(_formGenerator: TFormGenerator, path: string, formData: T): [TFormFieldData, boolean] {
+  console.log("findErrorToShow", path)
+  const fieldData = formData[path];
   const showError = Boolean(fieldData.errors.length) && fieldData.touched;
   return [
     {

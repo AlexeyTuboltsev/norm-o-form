@@ -77,13 +77,15 @@ export function insertArrayMember(formGenerator: TFormGenerator, fieldId: string
 
     formData[fieldId].children.splice(position, 0, memberPath)
 
-    return validateSelfAndParents(
+    const validated = validateSelfAndParents(
       formGenerator,
       fieldId,
       {
         ...formData,
         ...newMemberValidated
       })
+    const touched = setSelfAndParentsTouched(formGenerator, fieldId, validated)
+    return findFirstErrorToShow(formGenerator,fieldId,touched)
   }
 }
 
@@ -94,7 +96,9 @@ export function removeArrayMember(formGenerator: TFormGenerator, fieldPath: stri
     const updatedFormData = removeSubtree(fieldPath, formData)
     formData[parentPath].children = formData[parentPath].children.filter(childPath => childPath !== fieldPath)
 
-    return validateSelfAndParents(formGenerator, parentPath, updatedFormData)
+    const validated = validateSelfAndParents(formGenerator, parentPath, updatedFormData)
+    const touched = setSelfAndParentsTouched(formGenerator, parentPath, validated)
+    return findFirstErrorToShow(formGenerator, parentPath, touched)
 
   } else {
     //todo throw an error in dev environment
@@ -103,18 +107,23 @@ export function removeArrayMember(formGenerator: TFormGenerator, fieldPath: stri
 }
 
 export function moveArrayMember(formGenerator: TFormGenerator, fieldPath: string, formData: TFormData, targetPosition: number): TFormData {
-  const parentPath = getParentPath(fieldPath)
-  const currentPosition = !!(parentPath) ? formData[parentPath].children.indexOf(fieldPath) : undefined
+  const arrayPath = getParentPath(fieldPath)
+  const currentPosition = !!(arrayPath) ? formData[arrayPath].children.indexOf(fieldPath) : undefined
 
-  if (parentPath
+  if (arrayPath
     && (currentPosition !== -1 && currentPosition !== undefined)
     && (currentPosition !== targetPosition)
-    && (targetPosition >= 0 && targetPosition <= formData[parentPath].children.length - 1)
+    && (targetPosition >= 0 && targetPosition <= formData[arrayPath].children.length - 1)
   ) {
-    formData[parentPath].children.splice(currentPosition, 1)
-    formData[parentPath].children.splice(targetPosition, 0, fieldPath)
+    formData[arrayPath].children.splice(currentPosition, 1)
+    formData[arrayPath].children.splice(targetPosition, 0, fieldPath)
 
-    return validateSelfAndParents(formGenerator, parentPath, formData)
+    const validated = validateSelfAndParents(formGenerator, arrayPath, formData)
+    const touched = setSelfAndParentsTouched(formGenerator, arrayPath, validated)
+
+    return findFirstErrorToShow(formGenerator, arrayPath, touched)
+
+
   } else {
     //todo throw an error in dev environment
     return formData

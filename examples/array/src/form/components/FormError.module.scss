@@ -1,0 +1,7 @@
+@import "src/common";
+
+.error {
+  font-size: 13px;
+  color: $error-message-color;
+  text-align: right;
+}

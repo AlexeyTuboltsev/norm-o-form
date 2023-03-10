@@ -9,18 +9,13 @@ import { CancelFormButton, SubmitFormButton } from "./Button";
 import { formDataToButtonState, TFormData, TTextFieldData } from "norm-o-form";
 import { AddArrayMemberFormButton } from "./ArrayActions";
 import { ArrayMember } from "./ArrayMember";
+import { FormError } from "./FormError";
 
 type TFormWrapperProps<T extends TFormData> = {
   formId: string;
   formData: TFormData;
 }
 
-const FormError = ({ fieldData, className }: { fieldData: TFormFieldData, className?: string }) => {
-  const error = fieldData.errors[0]
-  return error
-    ? <div className={className}>{error}</div>
-    : null
-}
 
 export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayExampleForm>> = ({
   formId,
@@ -38,29 +33,32 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
       {...formData["arrayExampleForm.lastName"] as TTextFieldData}
       label="lastName"
     />
-    <div className={styles.array}>
+    <div className={styles.arrayWrapper}>
       <AddArrayMemberFormButton id='arrayExampleForm.favoriteArtists' />
-      {formData["arrayExampleForm.favoriteArtists"].children.map((arrayMemberPath, index) => {
-          return <ArrayMember
-            key={arrayMemberPath}
-            id={arrayMemberPath}
-            className={styles.arrayMember}
-            arrayLength={formData["arrayExampleForm.favoriteArtists"].children.length}
-            currentPosition={index}
-          >
-            <TextInput
-              {...((formData as any)[`${arrayMemberPath}.name`] as TTextFieldData)}
-              label="name"
-            />
-            <TextInput
-              {...((formData as any)[`${arrayMemberPath}.album`] as TTextFieldData)}
-              label="album"
-            />
+      <div className={styles.array}>
+        {formData["arrayExampleForm.favoriteArtists"].children.map((arrayMemberPath, index) => {
+            return <ArrayMember
+              key={arrayMemberPath}
+              id={arrayMemberPath}
+              className={styles.arrayMember}
+              arrayLength={formData["arrayExampleForm.favoriteArtists"].children.length}
+              currentPosition={index}
+            >
+              <TextInput
+                {...((formData as any)[`${arrayMemberPath}.name`] as TTextFieldData)}
+                label="name"
+              />
+              <TextInput
+                {...((formData as any)[`${arrayMemberPath}.album`] as TTextFieldData)}
+                label="album"
+              />
 
-            <FormError className={styles.arrayMemberError} fieldData={(formData as any)[`${arrayMemberPath}`]} />
-          </ArrayMember>
-        }
-      )}
+              <FormError className={styles.arrayMemberError} fieldData={(formData as any)[`${arrayMemberPath}`]} />
+            </ArrayMember>
+          }
+        )}
+      </div>
+      <FormError className={styles.arrayError} fieldData={formData["arrayExampleForm.favoriteArtists"]} />
     </div>
     <div className={styles.variantContainer}>
       <SelectInput

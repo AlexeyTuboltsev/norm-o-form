@@ -7,9 +7,9 @@ export function cleanupCode(input:string){
   return input.replace(re, "$1")
 }
 export function replacer(key:string,value:any){
-  if (typeof value === 'function' && value.name == "generate" ){
+  if (typeof value === 'function' && value.name === "generate" ){
     return "generate()"
-  } else if ((typeof value === 'function' && value.name == "getValue")) {
+  } else if ((typeof value === 'function' && value.name === "getValue")) {
     return 'getValue()'
   } else if (typeof value === 'function'){
     return "function"
