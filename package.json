@@ -6,9 +6,9 @@
   "main": "src/index.ts",
   "dependencies": {},
   "scripts": {
-    "build:install:dev": "tsc && cd examples/array && rm -fr node_modules/norm-o-form &&  yarn install --check-files && cd ../..",
+    "build:link:dev": "tsc && cp package.json dist",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "build": "react-app-rewired build",
+    "build": "tsc && cp package.json dist",
     "test": "jest",
     "eject": "react-scripts eject",
     "format": "prettier --list-different 'src/kvinta/**/*.{ts,tsx,js,json,md,gql}'",
