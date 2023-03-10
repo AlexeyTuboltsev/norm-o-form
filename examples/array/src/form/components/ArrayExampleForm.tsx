@@ -1,14 +1,14 @@
-import { FormWrapper } from "./components/FormWrapper";
-import { TextInput } from "./components/TextInput";
 import React from "react";
-import { SelectInput } from "./components/SelectInput";
+import { FormWrapper } from "./FormWrapper";
+import { TextInput } from "./TextInput";
+import { SelectInput } from "./SelectInput";
 import styles from "./ArrayExampleForm.module.scss"
-import { EOneOfType, TArrayExampleForm } from "./formDefinition";
+import { EOneOfType, TArrayExampleForm } from "../formDefinition";
 import { TFormFieldData } from "norm-o-form/types";
-import { CancelFormButton, SubmitFormButton } from "./components/Button";
+import { CancelFormButton, SubmitFormButton } from "./Button";
 import { formDataToButtonState, TFormData, TTextFieldData } from "norm-o-form";
-import { AddArrayMemberFormButton } from "./components/ArrayActions";
-import { ArrayMember } from "./components/ArrayMember";
+import { AddArrayMemberFormButton } from "./ArrayActions";
+import { ArrayMember } from "./ArrayMember";
 
 type TFormWrapperProps<T extends TFormData> = {
   formId: string;

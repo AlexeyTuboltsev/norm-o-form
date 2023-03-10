@@ -1,22 +1,22 @@
 import React from 'react';
-import { ToggleFormButton } from "./form/components/Button";
 import { useSelector } from "react-redux";
 import { ARRAY_EXAMPLE_FORM_ROOT, selectFormState } from "./form/formReducer";
-import { ArrayExampleForm } from "./form/ArrayExampleForm";
 import styles from "./App.module.scss"
+import { FormView } from "./form/components/FormView";
+import { ToggleFormButton } from "./form/components/Button";
+import { Tabs } from "./form/components/Tabs";
 
 function App() {
   const formState = useSelector(selectFormState)
-  return (
-    <div className={styles.App}>
 
-      {!formState[ARRAY_EXAMPLE_FORM_ROOT] && <ToggleFormButton />}
+  return (
+    <div className={styles.app}>
       {formState[ARRAY_EXAMPLE_FORM_ROOT]
-        ? <ArrayExampleForm
-            formId={ARRAY_EXAMPLE_FORM_ROOT}
-            formData={formState[ARRAY_EXAMPLE_FORM_ROOT]}
-          />
-        : null
+        ? <div className={styles.main}>
+          <Tabs viewTab={formState[ARRAY_EXAMPLE_FORM_ROOT].viewTab} />
+          <FormView {...formState[ARRAY_EXAMPLE_FORM_ROOT]} />
+        </div>
+        : <ToggleFormButton />
       }
     </div>
   );
