@@ -8,15 +8,24 @@
   padding: 20px;
 
   cursor: pointer;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border: 1px solid $dark-gray-color;
+
+  border-bottom: 2px solid $blue-color;
+  color: $dark-gray-color;
+
   &:hover,
   &:active {
-    background-color: $gray-color;
+    color: $blue-color;
+    border-color: $blue-color;
   }
 
   &.active {
     font-weight: bold;
-    background-color: $blue-color;
-    color: $white-color;
+    color: $blue-color;
+    border-color: $blue-color;
+    background-color: $white-color;
   }
 }
 
