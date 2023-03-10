@@ -21,9 +21,8 @@
     outline: none;
   }
 
-  &:focus-within {
-    border: 1px solid $blue-color;
 
+  &:focus-within  {
     label {
       top: -7px;
       left: 10px;
@@ -31,6 +30,12 @@
       font-size: 12px;
       color: $blue-color;
     }
+  }
+
+
+  &:hover,
+  &:focus-within  {
+    border: 1px solid $blue-color;
   }
 }
 

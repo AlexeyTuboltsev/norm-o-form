@@ -22,7 +22,7 @@
   }
 }
 
-.buttonDisabled{
+.buttonDisabled {
   color: $gray-color;
   cursor: default;
   border: 2px solid $gray-color;
@@ -40,7 +40,7 @@
   position: relative;
 }
 
-.buttonLoading{
+.buttonLoading {
   position: relative;
   color: transparent;
   border: 2px solid $gray-color;
@@ -75,26 +75,33 @@
 }
 
 .arrayButtonBase {
-    //min-width: 100px;
-  width:100%;
+  width: 100%;
   height: 18px;
 
-    padding: 2px;
-    font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    border: 1px solid $blue-color;
-    border-radius: 4px;
+  padding: 2px;
+  font-size: 16px;
 
-    background-color: transparent;
+  border: 1px solid $gray-color;
+  border-radius: 4px;
 
-    cursor: pointer;
+  background-color: transparent;
 
-    &:hover,
-    &:active,
-    {
-      background-color: $blue-color;
-      color: #ffffff
-    }
+  cursor: pointer;
+
+  &:hover,
+  &:active,
+  {
+    border-color: $blue-color;
+    background-color: $white-color;
+    color: $blue-color;
+  }
+  & * {
+    pointer-events: none;
+  }
 }
 
 .addArrayMemberButton {
