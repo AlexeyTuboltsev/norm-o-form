@@ -6,13 +6,13 @@ import styles from "./ArrayExampleForm.module.scss"
 import { EOneOfType, TArrayExampleForm } from "./formDefinition";
 import { TFormFieldData } from "norm-o-form/types";
 import { CancelFormButton, SubmitFormButton } from "./components/Button";
-import { formDataToButtonState, TTextFieldData } from "norm-o-form";
+import { formDataToButtonState, TFormData, TTextFieldData } from "norm-o-form";
 import { AddArrayMemberFormButton } from "./components/ArrayActions";
 import { ArrayMember } from "./components/ArrayMember";
 
-type TFormWrapperProps<T> = {
+type TFormWrapperProps<T extends TFormData> = {
   formId: string;
-  formData: T;
+  formData: TFormData;
 }
 
 const FormError = ({ fieldData, className }: { fieldData: TFormFieldData, className?: string }) => {
@@ -31,11 +31,11 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
     formId={formId}
   >
     < TextInput
-      {...formData["arrayExampleForm.firstName"]}
+      {...formData["arrayExampleForm.firstName"] as TTextFieldData}
       label="firstName"
     />
     <TextInput
-      {...formData["arrayExampleForm.lastName"]}
+      {...formData["arrayExampleForm.lastName"] as TTextFieldData}
       label="lastName"
     />
     <div className={styles.array}>
@@ -73,10 +73,14 @@ export const ArrayExampleForm: React.FunctionComponent<TFormWrapperProps<TArrayE
                    label="email" />
       ) : (
         <>
-          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.phone`]}
-                     label="phone" />
-          <TextInput {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.fax`]}
-                     label="fax" />
+          <TextInput
+            {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.phone`]}
+            label="phone"
+          />
+          <TextInput
+            {...(formData as any)[`arrayExampleForm.myVariants.${(formData as any)['arrayExampleForm.myVariants'].value}.fax`]}
+            label="fax"
+          />
         </>
       )}
     </div>

@@ -1,11 +1,18 @@
 import produce from "immer";
-import { insertArrayMember, generateForm, handleFormBlur, handleFormChange,removeArrayMember } from "norm-o-form";
+import {
+  insertArrayMember,
+  generateForm,
+  handleFormBlur,
+  handleFormChange,
+  removeArrayMember,
+  TFormData
+} from "norm-o-form";
 import { arrayExampleForm, initialFormValues, TArrayExampleForm } from "./formDefinition";
 import { GetReturnType } from "./utils";
 
 
 export type TFormReducer = {
-  arrayExampleForm?: (TArrayExampleForm)
+  [key: string]: TFormData
 }
 
 export enum EFormActionType {
@@ -27,10 +34,10 @@ export enum EFormUpdateType {
 }
 
 export type TFormUpdate =
-  |{ updateType: (EFormUpdateType.FOCUS|EFormUpdateType.CHANGE|EFormUpdateType.BLUR | EFormUpdateType.PASTE), fieldId: string, value: string }
-  |{ updateType: EFormUpdateType.INSERT_ARRAY_MEMBER, fieldId: string, position: number}
-  |{ updateType: EFormUpdateType.REMOVE_ARRAY_MEMBER, fieldId: string, }
-  |{ updateType: EFormUpdateType.MOVE_ARRAY_MEMBER, fieldId: string, targetPosition:number}
+  | { updateType: (EFormUpdateType.FOCUS | EFormUpdateType.CHANGE | EFormUpdateType.BLUR | EFormUpdateType.PASTE), fieldId: string, value: string }
+  | { updateType: EFormUpdateType.INSERT_ARRAY_MEMBER, fieldId: string, position: number }
+  | { updateType: EFormUpdateType.REMOVE_ARRAY_MEMBER, fieldId: string, }
+  | { updateType: EFormUpdateType.MOVE_ARRAY_MEMBER, fieldId: string, targetPosition: number }
 
 const initialState: TFormReducer = {}
 
@@ -49,53 +56,53 @@ export const ARRAY_EXAMPLE_FORM_ROOT = 'arrayExampleForm';
 const formGenerator = arrayExampleForm(ARRAY_EXAMPLE_FORM_ROOT)
 
 export const formReducer = produce((draftState: TFormReducer = initialState, action: GetReturnType<typeof formActions>) => {
-    switch (action.type) {
-      case EFormActionType.OPEN_FORM:
-        draftState.arrayExampleForm = generateForm(formGenerator,initialFormValues) as TArrayExampleForm
-        break;
-      case EFormActionType.CLOSE_FORM:
-        draftState.arrayExampleForm = undefined
-        break;
-      case EFormActionType.UPDATE_FORM: {
-        if (draftState.arrayExampleForm) {
-          // const formId = action.payload.fieldId.split(".")[0]
+  switch (action.type) {
+    case EFormActionType.OPEN_FORM:
+      draftState.arrayExampleForm = generateForm(formGenerator, initialFormValues) as TArrayExampleForm
+      break;
+    case EFormActionType.CLOSE_FORM:
+      delete draftState.arrayExampleForm
+      break;
+    case EFormActionType.UPDATE_FORM: {
+      if (draftState.arrayExampleForm) {
+        // const formId = action.payload.fieldId.split(".")[0]
 
-          switch (action.payload.updateType) {
-            case EFormUpdateType.CHANGE: {
-              const formData = draftState.arrayExampleForm
-              draftState.arrayExampleForm =handleFormChange(formGenerator, action.payload.fieldId,formData, action.payload.value) as TArrayExampleForm
-              break;
-            }
-            case EFormUpdateType.BLUR: {
-              const formData = draftState.arrayExampleForm
-              draftState.arrayExampleForm = handleFormBlur(formGenerator, action.payload.fieldId,formData, ) as TArrayExampleForm
-              break;
-            }
-            case EFormUpdateType.INSERT_ARRAY_MEMBER: {
-              const formData = draftState.arrayExampleForm
-              draftState.arrayExampleForm = insertArrayMember(formGenerator, action.payload.fieldId,formData,action.payload.position ) as TArrayExampleForm
-              break;
-            }
-            // case EFormUpdateType.MOVE_ARRAY_MEMBER: {
-            //   const formData = draftState.arrayExampleForm
-            //   // draftState.arrayExampleForm = insertArrayMember(formGenerator, action.payload.fieldId,formData,action.payload.position ) as TArrayExampleForm
-            //   break;
-            // }
-            case EFormUpdateType.REMOVE_ARRAY_MEMBER: {
-              console.log("REMOVE_ARRAY_MEMBER")
-              const formData = draftState.arrayExampleForm
-              draftState.arrayExampleForm = removeArrayMember(formGenerator, action.payload.fieldId,formData ) as TArrayExampleForm
-              break;
-            }
-            default:
-              break;
+        switch (action.payload.updateType) {
+          case EFormUpdateType.CHANGE: {
+            const formData = draftState.arrayExampleForm
+            draftState.arrayExampleForm = handleFormChange(formGenerator, action.payload.fieldId, formData, action.payload.value) as TArrayExampleForm
+            break;
           }
+          case EFormUpdateType.BLUR: {
+            const formData = draftState.arrayExampleForm
+            draftState.arrayExampleForm = handleFormBlur(formGenerator, action.payload.fieldId, formData,) as TArrayExampleForm
+            break;
+          }
+          case EFormUpdateType.INSERT_ARRAY_MEMBER: {
+            const formData = draftState.arrayExampleForm
+            draftState.arrayExampleForm = insertArrayMember(formGenerator, action.payload.fieldId, formData, action.payload.position) as TArrayExampleForm
+            break;
+          }
+          // case EFormUpdateType.MOVE_ARRAY_MEMBER: {
+          //   const formData = draftState.arrayExampleForm
+          //   // draftState.arrayExampleForm = insertArrayMember(formGenerator, action.payload.fieldId,formData,action.payload.position ) as TArrayExampleForm
+          //   break;
+          // }
+          case EFormUpdateType.REMOVE_ARRAY_MEMBER: {
+            console.log("REMOVE_ARRAY_MEMBER")
+            const formData = draftState.arrayExampleForm
+            draftState.arrayExampleForm = removeArrayMember(formGenerator, action.payload.fieldId, formData) as TArrayExampleForm
+            break;
+          }
+          default:
+            break;
         }
-        break;
       }
-      default:
-        return draftState
+      break;
     }
+    default:
+      return draftState
+  }
 
 })
 
